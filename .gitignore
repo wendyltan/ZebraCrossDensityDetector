@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+/checkpoints/
+/ssd300_120000/
+/weights/
+/my_dataset/
+/data/VOCdevkit/
+/.idea/
