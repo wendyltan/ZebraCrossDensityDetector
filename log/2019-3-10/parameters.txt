@@ -1,0 +1,7 @@
+dataset: VOC07+12
+batch_size 6
+cuda True
+visdom True
+learning_rate 8e-4 first then 1e-5
+iter: over 35k
+mAP: 
