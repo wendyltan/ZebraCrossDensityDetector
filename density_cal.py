@@ -6,7 +6,7 @@
 # @File    : density_cal.py
 # @Software: PyCharm
 from model import Weight
-import image_predict as im
+import predictor as im
 from model.Zebra import Zebra
 
 
@@ -111,7 +111,31 @@ def zebra_cross(predictions,zebra):
             print(image,'density over max!too crowded around')
 
 
+def get_predictions(zebra,image_or_video):
+    '''
+    Get the predictions from detect and unpack
+    :param zebra:
+    :return:
+    '''
+    mode = zebra.get_mode()
+    predictions = {}
+    # currently only support image mode
+    result = im.predict(zebra,image_or_video)
+
+    # unpack predict result
+    if mode == 'muti':
+        for model, prediction in result.items():
+            pre = {}
+            for class_name, predict in prediction.items():
+                pre[class_name] = predict.read_predict_result()
+            predictions[model] = pre
+    elif mode == 'single':
+        for name, predict in result.items():
+            predictions[name] = predict.read_predict_result()
+
+    return predictions
+
 if __name__ == '__main__':
     zebra = Zebra('tri_zebra','muti')
     print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-    zebra_cross(im.predict(zebra), zebra)
+    zebra_cross(get_predictions(zebra,'video'), zebra)

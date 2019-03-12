@@ -6,7 +6,7 @@ This project is based on [ssd.pytorch](https://github.com/amdegroot/ssd.pytorch)
 ## Quick Start Guide
 To run my program,first you should check for the things below:
 - make a directory under project root named weights/, download **vgg16_reducedfc.pth** base trainning network.
-- make a directory under project root named my_dataset/,and two subdirectories under it: **my_dataset/zebra_cars** and **my_dataset/zebra_people** and put in your test images.remember to named them with thier index.like,`1.jpg`
+- Under two subdirectories  **my_dataset/zebra_cars** and **my_dataset/zebra_people** , put in your test images.remember to named them with thier index.like,`1.jpg` at image mode.In video mode image saving is auto.
 - download your VOC train dataset to data/, use shell script in data/script to help you do that.
 
 &nbsp;
@@ -28,7 +28,9 @@ So I will post my job under `log/`.
 ## TODO
 The part I hope to complete in the near future
 - Still to come:
-  * [ ] Complete support for image and video steam detect.
+  * [x] Complete support for image and video steam detect.
   * [ ] Add ploty figure to draw chart of the result as record.
   * [ ] Build an elegant ui based on PyQt5.
   * [ ] Keep trainning the model to retreive higher mAP.
+  * [ ] Add video read support for current video detect function
+
