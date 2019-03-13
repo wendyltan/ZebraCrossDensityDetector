@@ -44,5 +44,4 @@ def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
         print('make result directory success')
-    else:
-        print('target directory already satisfied!')
+

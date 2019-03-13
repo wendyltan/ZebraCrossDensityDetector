@@ -5,10 +5,13 @@
 # @Usage   : For weight definition and density calculation
 # @File    : density_cal.py
 # @Software: PyCharm
+import json
+import os
+import config as C
 from model import Weight
 import predictor as im
 from model.Zebra import Zebra
-
+import draw_chart as dc
 
 def core_density(zebra_type,predictions,density):
     '''
@@ -105,10 +108,13 @@ def zebra_cross(predictions,zebra):
     elif mode == 'muti':
         result_set = muti_model_caculation(zebra.get_type(),predictions)
     print(result_set)
-
+    dc.draw(result_set, zebra)
     for image,density in result_set.items():
         if zebra.is_over_max(density):
+            result_set[image] = str(density) +' over_max'
             print(image,'density over max!too crowded around')
+    write_density(result_set)
+
 
 
 def get_predictions(zebra,image_or_video):
@@ -118,6 +124,7 @@ def get_predictions(zebra,image_or_video):
     :return:
     '''
     mode = zebra.get_mode()
+    type = zebra.get_type()
     predictions = {}
     # currently only support image mode
     result = im.predict(zebra,image_or_video)
@@ -130,12 +137,28 @@ def get_predictions(zebra,image_or_video):
                 pre[class_name] = predict.read_predict_result()
             predictions[model] = pre
     elif mode == 'single':
-        for name, predict in result.items():
-            predictions[name] = predict.read_predict_result()
+        if type == 'one_zebra':
+            dic = result.read_predict_result()
+            for name, predict in dic.items():
+                predictions[name] = predict
+        elif type == 'tri_zebra' or type == 'rec_zebra':
+            for name,predict in result.items():
+                predictions[name] = predict.read_predict_result()
 
     return predictions
+
+def write_density(result):
+
+    if not os.path.exists(C.PREDICT_RESULT_PATH):
+        os.makedirs(C.PREDICT_RESULT_PATH)
+
+    preObj = json.dumps(result)
+    fileObject = open(C.PREDICT_RESULT_PATH+'final_result.json', 'w')
+    fileObject.write(preObj)
+    fileObject.close()
+
 
 if __name__ == '__main__':
     zebra = Zebra('tri_zebra','muti')
     print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-    zebra_cross(get_predictions(zebra,'video'), zebra)
+    zebra_cross(get_predictions(zebra,'image'), zebra)

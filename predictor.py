@@ -6,8 +6,6 @@
 # @File    : predictor.py
 # @Software: PyCharm
 import os
-from time import sleep
-
 import cv2
 import torch
 from torch.autograd import Variable
@@ -15,17 +13,8 @@ from model.Predictions import Predictions
 from utils import helper as hp
 from data import BaseTransform, VOC_CLASSES as labelmap
 from ssd import build_ssd
+import config as C
 
-
-
-COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
-FONT = cv2.FONT_HERSHEY_SIMPLEX
-# using author's best trained model as default
-SINGLE_NET_NAME = 'ssd300_mAP_77.43_v2.pth'
-NET_POSITION = './checkpoints'
-DEFAULT_RESULT_PATH = 'my_dataset/result'
-MAX_SAVED_IMAGE = 10
-SLEEP_TIME = 5
 
 
 def predict(zebra,image_or_video):
@@ -40,7 +29,7 @@ def predict(zebra,image_or_video):
     if mode == 'muti':
         return muti_model_predict(cross_type,image_or_video)
     elif mode == 'single':
-        return single_model_predict(cross_type,SINGLE_NET_NAME,image_or_video)
+        return single_model_predict(cross_type,C.SINGLE_NET_NAME,image_or_video)
 
 def single_model_predict(cross_type,net_name,image_or_video):
     '''
@@ -60,7 +49,7 @@ def muti_model_predict(cross_type,image_or_video):
     :param cross_type:  one_zebra,tri_zebra or rec_zebra
     :return: a two-dimension dictionary of each model's prediction
     '''
-    path = NET_POSITION
+    path = C.NET_POSITION
     models = os.listdir(path)  # 得到文件夹下的所有文件名称
     total_dict = {}
     for model in models:  # 遍历文件夹
@@ -82,67 +71,98 @@ def get_predicts(cross_type, transform, net,image_or_video):
     tag = ['people','cars']
     total = {}
     if cross_type == 'one_zebra':
-        path = judge_mode(image_or_video, tag[0])
+        path = judge_mode(image_or_video, tag[0],C.DEFAULT_VIDEO_SOURCE)
         total = core_predict(path, transform, net, tag[0])
     elif cross_type == 'tri_zebra' or cross_type == 'rec_zebra':
         # considering the influence of car of the crowd
         print('Do the prediction of people first...')
         print('*' * 100 + '>')
-        path = judge_mode(image_or_video, tag[0])
+        path = judge_mode(image_or_video, tag[0],C.DEFAULT_VIDEO_SOURCE)
         total['people'] = core_predict(path, transform, net, tag[0])
 
         print('Now doing the predictions of cars...')
         print('*' * 100 + '>')
-        path = judge_mode(image_or_video, tag[1])
+        path = judge_mode(image_or_video, tag[1],C.DEFAULT_VIDEO_SOURCE)
         total['cars'] = core_predict(path, transform, net, tag[1])
     return total
 
 
-def judge_mode(image_or_video,tag):
+def judge_mode(image_or_video,tag,from_which=''):
     path = ''
     if image_or_video == 'image':
         base_dir = 'my_dataset/zebra_'
         path = base_dir+tag
         hp.mkdir(path)
-    elif image_or_video == 'video':
+    elif image_or_video == 'video' and from_which!='':
         base_dir = 'my_dataset/video_'
         path = base_dir+tag
         hp.mkdir(path)
-        image_capture(path)
+        if from_which == 'camera':
+            image_capture(path)
+        elif from_which == 'video_file':
+            read_video(path,tag+'.mp4')
+
     return path
 
 def image_capture(saveDir):
     # start image capturing
     image_Count = 1
     cap = cv2.VideoCapture(0)
-    width, height = 640, 480
+    width, height = 1920, 1080
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     print('width: ', width)
     print('height: ', height)
-
-
+    fps = cap.get(5)
+    print('Current fps:' ,fps)
+    counter = 0
     while True:
-
         ret, frame = cap.read()
-        frame = cv2.flip(frame, 1, dst=None)
         key = cv2.waitKey(1) & 0xFF
         cv2.imshow("video_detect", frame)
-        # save original image
-        cv2.imwrite("%s/%d.jpg" % (saveDir, image_Count), cv2.resize(frame, (300, 300), interpolation=cv2.INTER_AREA))
-        print(u"%s:第 %d 张图片" % (saveDir, image_Count))
-        # do frame predict and save detect result image to result/
-        if key == 27 or image_Count == MAX_SAVED_IMAGE:  # exit
-            break
-        image_Count += 1
+        # save image every 150 frame on my computer / 5 seconds
+        if (counter % fps) == 0:
+            cv2.imwrite("%s/%d.jpg" % (saveDir, image_Count), cv2.resize(frame, (500, 375), interpolation=cv2.INTER_AREA))
+            print(u"%s:第 %d 张图片" % (saveDir, image_Count))
+            # do frame predict and save detect result image to result/
+            if key == ord('q') or image_Count == C.MAX_SAVED_IMAGE:  # exit
+                break
+            image_Count += 1
+        counter +=1
 
-        # save pic every 5 seconds
-        sleep(SLEEP_TIME)
 
     cap.release()  # 释放摄像头
     cv2.destroyAllWindows()  # 丢弃窗口
 
+def read_video(result_path,video_name):
 
+    video_path = 'my_dataset/video/'
+    # read in the video first
+    video = cv2.VideoCapture(video_path+video_name)
+    print('-'*100)
+    print('reading video from ',video_path+video_name)
+    counter = 1
+
+    if video.isOpened():  # 判断是否正常打开
+        rval, frame = video.read()
+    else:
+        rval = False
+
+    fps = video.get(cv2.CAP_PROP_FPS)
+
+    # save image every 5 seconds
+    timeF = fps * 5
+    print('Start to save frame from video every ', timeF, ' frame')
+    i=0
+    while rval:  # read video frame
+        rval, frame = video.read()
+        if (counter % timeF == 0):  # every timeF frame do the saving
+            i+=1
+            print('Saving frame',counter)
+            cv2.imwrite(result_path+ '/'+str(i) + '.jpg', frame)  # save the frame picture
+        counter += 1
+        cv2.waitKey(1)
+    video.release()
 
 def core_predict(directory,transform,net,tag):
     '''
@@ -155,7 +175,7 @@ def core_predict(directory,transform,net,tag):
     '''
 
     # path used for storing predictions results
-    result_path = DEFAULT_RESULT_PATH
+    result_path = C.DEFAULT_RESULT_PATH
     hp.mkdir(result_path)
     # init the failed count
     failed_count = 0
@@ -202,9 +222,9 @@ def core_predict(directory,transform,net,tag):
                 cv2.rectangle(img,
                               (int(pt[0]), int(pt[1])),
                               (int(pt[2]), int(pt[3])),
-                              COLORS[i % 3], 2)
+                              C.COLORS[i % 3], 2)
                 cv2.putText(img, label_name, (int(pt[0]), int(pt[1])),
-                            FONT, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
+                            C.FONT, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
                 cv2.imwrite(result_path + '/result_' + tag+'_'+img_name, img)
 
                 pred_num += 1
@@ -244,7 +264,4 @@ def ssd_net_init(trained_net_name):
     return net
 
 
-def read_video_and_predict():
-    # wait to be implemented
-    pass
 

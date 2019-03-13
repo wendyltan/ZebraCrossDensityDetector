@@ -8,8 +8,8 @@
 
 # suit yourself to define the max
 MAX_ALLOWED_DENSITY_ONE_ZEBRA = 5
-MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA = 2
-MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA = 4
+MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA = 10
+MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA = 25
 class Zebra(object):
 
     def __init__(self,cross_type,mode='single'):

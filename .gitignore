@@ -107,3 +107,5 @@ venv.bak/
 /my_dataset/
 /data/VOCdevkit/
 /.idea/
+/predict_image/
+/predict_text/
