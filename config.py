@@ -12,8 +12,11 @@ FONT = cv2.FONT_HERSHEY_SIMPLEX
 # using author's best trained model as default
 SINGLE_NET_NAME = 'ssd_300_VOC0712.pth'
 NET_POSITION = './checkpoints'
+DEFAULT_VIDEO_SOURCE = 'video_file' # change to `camera` if you like
+ICON_PATH = 'ui/zebraCross.ico'
+
 DEFAULT_RESULT_PATH = 'my_dataset/result'
 MAX_SAVED_IMAGE = 10
-DEFAULT_VIDEO_SOURCE = 'camera' # change to `camera` if you like
 PREDICT_RESULT_PATH = 'predict_text/'
 PREDICT_RESULT_IMAGE = 'predict_image/'
+

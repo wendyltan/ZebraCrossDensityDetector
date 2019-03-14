@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1121</width>
+    <height>722</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>470</y>
+      <width>641</width>
+      <height>211</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>状态显示区域</string>
+    </property>
+    <widget class="QTextBrowser" name="textBrowser">
+     <property name="geometry">
+      <rect>
+       <x>-5</x>
+       <y>20</y>
+       <width>651</width>
+       <height>192</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>0</y>
+      <width>481</width>
+      <height>341</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>启动设置</string>
+    </property>
+    <widget class="QPushButton" name="detectButton">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>290</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>开始检测</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="resetButton">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>290</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>重置</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>50</y>
+       <width>72</width>
+       <height>15</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>选择模型</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBox">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>50</y>
+       <width>141</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>120</y>
+       <width>111</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>选择斑马线种类</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBox_2">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>120</y>
+       <width>141</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>340</y>
+      <width>481</width>
+      <height>331</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>结果显示区域</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>641</width>
+      <height>461</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>图片视频显示区域</string>
+    </property>
+    <widget class="QGraphicsView" name="graphicsView">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>20</y>
+       <width>641</width>
+       <height>441</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1121</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>模式选择</string>
+    </property>
+    <widget class="QMenu" name="menuimage_mode">
+     <property name="title">
+      <string>image mode</string>
+     </property>
+     <addaction name="actionopen_singe_image"/>
+     <addaction name="actionopen_a_directory_for_detect"/>
+    </widget>
+    <widget class="QMenu" name="menuvideo_mode">
+     <property name="title">
+      <string>video mode</string>
+     </property>
+     <addaction name="actionuse_camera_as_input"/>
+     <addaction name="actionuse_video_file_as_input"/>
+    </widget>
+    <addaction name="menuimage_mode"/>
+    <addaction name="menuvideo_mode"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>参数设置</string>
+    </property>
+    <addaction name="actioncommon_setting"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>关于</string>
+    </property>
+    <addaction name="actionabout"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actiondensity_setting">
+   <property name="text">
+    <string>density setting</string>
+   </property>
+  </action>
+  <action name="actionglobal_setting">
+   <property name="text">
+    <string>global setting</string>
+   </property>
+  </action>
+  <action name="actionweight_setting">
+   <property name="text">
+    <string>weight setting</string>
+   </property>
+  </action>
+  <action name="actionabout">
+   <property name="text">
+    <string>about</string>
+   </property>
+  </action>
+  <action name="actionopen_singe_image">
+   <property name="text">
+    <string>open singe image</string>
+   </property>
+  </action>
+  <action name="actionopen_a_directory_for_detect">
+   <property name="text">
+    <string>open a directory for detect</string>
+   </property>
+  </action>
+  <action name="actioncommon_setting">
+   <property name="text">
+    <string>common setting</string>
+   </property>
+  </action>
+  <action name="actionuse_camera_as_input">
+   <property name="text">
+    <string>use camera as input</string>
+   </property>
+  </action>
+  <action name="actionuse_video_file_as_input">
+   <property name="text">
+    <string>use video file as input</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -159,6 +159,6 @@ def write_density(result):
 
 
 if __name__ == '__main__':
-    zebra = Zebra('tri_zebra','muti')
+    zebra = Zebra('tri_zebra','single')
     print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-    zebra_cross(get_predictions(zebra,'image'), zebra)
+    zebra_cross(get_predictions(zebra,'video'), zebra)
