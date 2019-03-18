@@ -8,9 +8,10 @@
 
 import plotly.graph_objs as go
 import plotly.offline as off
-import config as C
+from config import Config as C
 from utils import helper as hp
 
+C = C()
 def draw(result_set,zebra):
 
     print('Ploting the image now...')

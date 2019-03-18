@@ -7,7 +7,8 @@
 # @Software: PyCharm
 import os
 import json
-PREDICT_RESULT_PATH = './predict_text/'
+from config import Config as C
+PREDICT_RESULT_PATH = C().PREDICT_RESULT_PATH
 
 class Predictions(object):
     '''

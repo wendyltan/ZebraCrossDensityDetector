@@ -5,11 +5,14 @@
 # @Usage   : Weight object for weight info storing and caculating later
 # @File    : Weight.py
 # @Software: PyCharm
+from config import Config as C
 TYPE = ['person','motorbike','bicycle','dog','cat','car','bus']
-PERSON_WEIGHT = 1
-BIKE_WEIGHT = 1.5
-PET_WEIGHT = 0.5
-CAR_WEIGHT = 2
+config = C()
+PERSON_WEIGHT = float(config.PERSON_WEIGHT)
+BIKE_WEIGHT = float(config.BIKE_WEIGHT)
+PET_WEIGHT = float(config.PET_WEIGHT)
+CAR_WEIGHT = float(config.CAR_WEIGHT)
+
 class Weight(object):
 
     def __init__(self,name):

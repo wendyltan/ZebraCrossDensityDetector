@@ -13,10 +13,9 @@ from model.Predictions import Predictions
 from utils import helper as hp
 from data import BaseTransform, VOC_CLASSES as labelmap
 from ssd import build_ssd
-import config as C
+from config import Config as C
 
-
-
+C = C()
 def predict(zebra,image_or_video):
     '''
     Make predictions according to the zebra cross type and mode
@@ -125,7 +124,7 @@ def image_capture(saveDir):
             cv2.imwrite("%s/%d.jpg" % (saveDir, image_Count), cv2.resize(frame, (500, 375), interpolation=cv2.INTER_AREA))
             print(u"%s:第 %d 张图片" % (saveDir, image_Count))
             # do frame predict and save detect result image to result/
-            if key == ord('q') or image_Count == C.MAX_SAVED_IMAGE:  # exit
+            if key == ord('q') or image_Count == int(C.MAX_SAVED_IMAGE):  # exit
                 break
             image_Count += 1
         counter +=1

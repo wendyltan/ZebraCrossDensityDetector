@@ -7,12 +7,13 @@
 # @Software: PyCharm
 import json
 import os
-import config as C
+from config import Config as C
 from model import Weight
 import predictor as im
 from model.Zebra import Zebra
 import draw_chart as dc
 
+C = C()
 def core_density(zebra_type,predictions,density):
     '''
     Core density calculation
@@ -159,6 +160,6 @@ def write_density(result):
 
 
 if __name__ == '__main__':
-    zebra = Zebra('tri_zebra','single')
+    zebra = Zebra('one_zebra','single')
     print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-    zebra_cross(get_predictions(zebra,'video'), zebra)
+    zebra_cross(get_predictions(zebra,'image'), zebra)
