@@ -157,9 +157,3 @@ def write_density(result):
     fileObject = open(C.PREDICT_RESULT_PATH+'final_result.json', 'w')
     fileObject.write(preObj)
     fileObject.close()
-
-
-if __name__ == '__main__':
-    zebra = Zebra('one_zebra','single')
-    print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-    zebra_cross(get_predictions(zebra,'image'), zebra)

@@ -26,7 +26,7 @@
     <property name="title">
      <string>状态显示区域</string>
     </property>
-    <widget class="QTextBrowser" name="textBrowser">
+    <widget class="QTextBrowser" name="statusBrowser">
      <property name="geometry">
       <rect>
        <x>-5</x>
@@ -88,7 +88,7 @@
       <string>选择模型</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="chooseModelCombo">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -111,11 +111,34 @@
       <string>选择斑马线种类</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBox_2">
+    <widget class="QComboBox" name="chooseZebraCombo">
      <property name="geometry">
       <rect>
        <x>250</x>
        <y>120</y>
+       <width>141</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>200</y>
+       <width>111</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>选择视频类型</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="chooseVideoType">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>190</y>
        <width>141</width>
        <height>22</height>
       </rect>
@@ -183,8 +206,6 @@
      <property name="title">
       <string>video mode</string>
      </property>
-     <addaction name="actionuse_camera_as_input"/>
-     <addaction name="actionuse_video_file_as_input"/>
     </widget>
     <addaction name="menuimage_mode"/>
     <addaction name="menuvideo_mode"/>

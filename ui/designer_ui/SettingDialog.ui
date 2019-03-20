@@ -38,7 +38,7 @@
      <string>当前最大密度：单行斑马线</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_5">
+   <widget class="QLineEdit" name="one_zebra">
     <property name="geometry">
      <rect>
       <x>290</x>
@@ -48,7 +48,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_6">
+   <widget class="QLineEdit" name="triangle_zebra">
     <property name="geometry">
      <rect>
       <x>290</x>
@@ -71,7 +71,7 @@
      <string>当前最大密度：三岔路斑马线</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_7">
+   <widget class="QLineEdit" name="rectangle_zebra">
     <property name="geometry">
      <rect>
       <x>290</x>
@@ -159,7 +159,7 @@
      <string>car</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit">
+   <widget class="QLineEdit" name="person_weight">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -169,7 +169,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_2">
+   <widget class="QLineEdit" name="bike_weight">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -179,7 +179,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_3">
+   <widget class="QLineEdit" name="pet_weight">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -189,7 +189,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_4">
+   <widget class="QLineEdit" name="car_weight">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -200,7 +200,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="confirmBtn">
    <property name="geometry">
     <rect>
      <x>410</x>
@@ -213,7 +213,7 @@
     <string>确认设置</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="cancelBtn">
    <property name="geometry">
     <rect>
      <x>510</x>
@@ -251,7 +251,7 @@
      <string>默认结果存储路径</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_8">
+   <widget class="QLineEdit" name="default_result_path">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -261,7 +261,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="choose_result_path_btn">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -287,7 +287,7 @@
      <string>默认摄像头截取图片数目</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_9">
+   <widget class="QLineEdit" name="max_image_num">
     <property name="geometry">
      <rect>
       <x>240</x>
@@ -297,7 +297,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_10">
+   <widget class="QLineEdit" name="default_result_text">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -307,7 +307,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="choose_result_text_btn">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -333,7 +333,7 @@
      <string>默认json存储路径</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_11">
+   <widget class="QLineEdit" name="default_result_html">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -343,7 +343,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
+   <widget class="QPushButton" name="choose_result_html_btn">
     <property name="geometry">
      <rect>
       <x>450</x>
