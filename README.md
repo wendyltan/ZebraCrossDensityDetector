@@ -33,8 +33,10 @@ The part I hope to complete in the near future
 - Still to come:
   * [x] Complete support for image and video steam detect.
   * [x] Add ploty figure to draw chart of the result as record.
-  * [ ] Build an elegant ui based on PyQt5.
+  * [x] Build an elegant ui based on PyQt5.
   * [ ] Figure out the best wait to caulate density.
   * [ ] Add more chart types for result display if needed.
+  * [ ] Do refactor to make codes more readable.
+  * [ ] 编写开题和中期检查表
   * [x] Add video read support for current video detect function.
 

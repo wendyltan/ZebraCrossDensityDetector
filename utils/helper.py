@@ -20,6 +20,8 @@ def pull_image(directory,index):
     '''
     file_path = directory + '/'+str(index) + '.jpg'
     image_resize(file_path)
+
+    # can not accept Chinese file path!
     return cv2.imread(file_path, cv2.IMREAD_COLOR)
 
 def image_resize(file_path):

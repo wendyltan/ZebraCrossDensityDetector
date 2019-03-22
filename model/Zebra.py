@@ -52,8 +52,8 @@ class Zebra(object):
         self.max_density = new_density
         print('Now the max density of ',self.get_name(),' is ',self.get_current_max_density())
 
-    def is_over_max(self,density):
-        if density > self.get_current_max_density():
+    def is_over_max(self,density,model_num):
+        if density > self.get_current_max_density()/model_num:
             return True
         else:
             return False

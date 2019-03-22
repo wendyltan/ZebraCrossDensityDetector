@@ -37,13 +37,13 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="startSetting">
     <property name="geometry">
      <rect>
       <x>640</x>
       <y>0</y>
       <width>481</width>
-      <height>341</height>
+      <height>371</height>
      </rect>
     </property>
     <property name="title">
@@ -52,8 +52,8 @@
     <widget class="QPushButton" name="detectButton">
      <property name="geometry">
       <rect>
-       <x>270</x>
-       <y>290</y>
+       <x>260</x>
+       <y>340</y>
        <width>93</width>
        <height>28</height>
       </rect>
@@ -65,8 +65,8 @@
     <widget class="QPushButton" name="resetButton">
      <property name="geometry">
       <rect>
-       <x>380</x>
-       <y>290</y>
+       <x>370</x>
+       <y>340</y>
        <width>93</width>
        <height>28</height>
       </rect>
@@ -102,7 +102,7 @@
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>120</y>
+       <y>90</y>
        <width>111</width>
        <height>16</height>
       </rect>
@@ -115,43 +115,144 @@
      <property name="geometry">
       <rect>
        <x>250</x>
-       <y>120</y>
+       <y>90</y>
        <width>141</width>
        <height>22</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label_3">
+    <widget class="QGroupBox" name="videoOptions">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>200</y>
-       <width>111</width>
-       <height>16</height>
+       <x>20</x>
+       <y>130</y>
+       <width>441</width>
+       <height>71</height>
       </rect>
      </property>
-     <property name="text">
-      <string>选择视频类型</string>
+     <property name="title">
+      <string>视频选项</string>
      </property>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>30</y>
+        <width>111</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>选择视频类型</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="chooseVideoType">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>30</y>
+        <width>141</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
-    <widget class="QComboBox" name="chooseVideoType">
+    <widget class="QGroupBox" name="imageOptions">
      <property name="geometry">
       <rect>
-       <x>250</x>
-       <y>190</y>
-       <width>141</width>
-       <height>22</height>
+       <x>20</x>
+       <y>210</y>
+       <width>441</width>
+       <height>131</height>
       </rect>
      </property>
+     <property name="title">
+      <string>图片选项</string>
+     </property>
+     <widget class="QCheckBox" name="singleImageCheckbox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>20</y>
+        <width>91</width>
+        <height>19</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>单张图片</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="imageDirCheckbox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>60</y>
+        <width>141</width>
+        <height>19</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>多张图片的目录</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="chooseImageBtn">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>10</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>选择图片</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="chooseDirBtn">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>50</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>选择目录</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="imagePathLineEdit">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>100</y>
+        <width>231</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>100</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>文件或者目录</string>
+      </property>
+     </widget>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox">
+   <widget class="QGroupBox" name="resultArea">
     <property name="geometry">
      <rect>
       <x>640</x>
-      <y>340</y>
+      <y>370</y>
       <width>481</width>
-      <height>331</height>
+      <height>301</height>
      </rect>
     </property>
     <property name="title">
@@ -195,20 +296,14 @@
     <property name="title">
      <string>模式选择</string>
     </property>
-    <widget class="QMenu" name="menuimage_mode">
+    <widget class="QMenu" name="menu_choose_mode">
      <property name="title">
-      <string>image mode</string>
+      <string>choose_mode</string>
      </property>
-     <addaction name="actionopen_singe_image"/>
-     <addaction name="actionopen_a_directory_for_detect"/>
+     <addaction name="action_image_mode"/>
+     <addaction name="action_video_mode"/>
     </widget>
-    <widget class="QMenu" name="menuvideo_mode">
-     <property name="title">
-      <string>video mode</string>
-     </property>
-    </widget>
-    <addaction name="menuimage_mode"/>
-    <addaction name="menuvideo_mode"/>
+    <addaction name="menu_choose_mode"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -247,14 +342,23 @@
     <string>about</string>
    </property>
   </action>
-  <action name="actionopen_singe_image">
+  <action name="action_image_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>open singe image</string>
+    <string>image_mode</string>
    </property>
   </action>
-  <action name="actionopen_a_directory_for_detect">
+  <action name="action_video_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>open a directory for detect</string>
+    <string>video_mode</string>
    </property>
   </action>
   <action name="actioncommon_setting">

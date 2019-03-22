@@ -9,11 +9,12 @@ import json
 import os
 from config import Config as C
 from model import Weight
-import predictor as im
+import predictor as pd
 from model.Zebra import Zebra
 import draw_chart as dc
 
 C = C()
+
 def core_density(zebra_type,predictions,density):
     '''
     Core density calculation
@@ -49,7 +50,7 @@ def core_density(zebra_type,predictions,density):
 
     return density
 
-def single_model_caculation(zebra_type,predictions):
+def single_model_caculation(zebra,predictions):
     '''
     Single model density caculate
     :param zebra_type:
@@ -58,6 +59,7 @@ def single_model_caculation(zebra_type,predictions):
     '''
 
     density = {}
+    zebra_type = zebra.get_type()
     if zebra_type == 'one_zebra':
         density = core_density(zebra_type,predictions,density)
     elif zebra_type == 'tri_zebra' or zebra_type == 'rec_zebra':
@@ -70,7 +72,7 @@ def single_model_caculation(zebra_type,predictions):
 
     return density
 
-def muti_model_caculation(zebra_type,predictions):
+def muti_model_caculation(zebra,predictions):
     '''
     Mutiple models density caculate
     :param zebra_type:
@@ -81,7 +83,7 @@ def muti_model_caculation(zebra_type,predictions):
     muti_density = {}
     model_num = 0
     for model, result in predictions.items():
-        for image,result in single_model_caculation(zebra_type,result).items():
+        for image,result in single_model_caculation(zebra,result).items():
             muti_density[image] = 0
             muti_density[image] += result
         model_num +=1
@@ -91,7 +93,7 @@ def muti_model_caculation(zebra_type,predictions):
             muti_density[image] /= model_num
             muti_density[image]=round(muti_density[image],3)
 
-    return muti_density
+    return muti_density,model_num
 
 
 def zebra_cross(predictions,zebra):
@@ -105,20 +107,21 @@ def zebra_cross(predictions,zebra):
     result_set = {}
     mode = zebra.get_mode()
     if mode == 'single':
-        result_set = single_model_caculation(zebra.get_type(),predictions)
+        result_set = single_model_caculation(zebra,predictions)
+        model_num = 1
     elif mode == 'muti':
-        result_set = muti_model_caculation(zebra.get_type(),predictions)
+        result_set,model_num = muti_model_caculation(zebra,predictions)
     print(result_set)
-    dc.draw(result_set, zebra)
+    dc.draw(result_set, zebra,model_num)
     for image,density in result_set.items():
-        if zebra.is_over_max(density):
+        if zebra.is_over_max(density,model_num):
             result_set[image] = str(density) +' over_max'
             print(image,'density over max!too crowded around')
     write_density(result_set)
 
 
 
-def get_predictions(zebra,image_or_video):
+def get_predictions(zebra,image_or_video,image_path):
     '''
     Get the predictions from detect and unpack
     :param zebra:
@@ -128,15 +131,19 @@ def get_predictions(zebra,image_or_video):
     type = zebra.get_type()
     predictions = {}
     # currently only support image mode
-    result = im.predict(zebra,image_or_video)
+
+    result = pd.predict(zebra, image_or_video,image_path)
 
     # unpack predict result
     if mode == 'muti':
         for model, prediction in result.items():
             pre = {}
-            for class_name, predict in prediction.items():
-                pre[class_name] = predict.read_predict_result()
-            predictions[model] = pre
+            if image_path !='':
+                predictions[model] = prediction.read_predict_result()
+            else:
+                for class_name, predict in prediction.items():
+                    pre[class_name] = predict.read_predict_result()
+                predictions[model] = pre
     elif mode == 'single':
         if type == 'one_zebra':
             dic = result.read_predict_result()
@@ -157,3 +164,16 @@ def write_density(result):
     fileObject = open(C.PREDICT_RESULT_PATH+'final_result.json', 'w')
     fileObject.write(preObj)
     fileObject.close()
+
+if __name__ == '__main__':
+    pass
+    # #can only use relative directory,why?
+    # image_path = 'C:/Users/Wendyltanpcy/Desktop/毕业设计/ZebraCrossDensityDetector/5.jpg'.split('/')
+    # path = ''
+    # image_path = ('\\\\').join(image_path)
+    # print(image_path)
+    # zebra = Zebra('one_zebra','muti')
+    # print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
+    #
+    # zebra_cross(get_predictions(zebra,'image',image_path),zebra)
+
