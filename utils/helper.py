@@ -5,6 +5,7 @@
 # @Usage   : Saving the common used function.
 # @File    : helper.py
 # @Software: PyCharm
+import inspect
 import os
 import cv2
 from PIL import Image
@@ -47,3 +48,18 @@ def mkdir(path):
         os.makedirs(path)
         print('make result directory success')
 
+def load_file(relative_path):
+
+    current_path = inspect.getfile(inspect.currentframe())
+    dir_name = os.path.dirname(current_path)
+    file_abs_path = os.path.abspath(dir_name)
+    list_path = os.path.split(file_abs_path)
+    file_path = os.path.join(list_path[0], relative_path)
+
+    return file_path
+
+def get_latest_file(relative_dir):
+    list = os.listdir(relative_dir)
+    list.sort(key=lambda fn: os.path.getmtime(relative_dir + fn)
+    if not os.path.isdir(relative_dir + fn) else 0)
+    return list[-1]

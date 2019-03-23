@@ -22,6 +22,7 @@ class SettingDialog(QtWidgets.QDialog,Ui_Dialog):
         self.choose_result_path_btn.clicked.connect(self.choose_result_path)
         self.choose_result_html_btn.clicked.connect(self.choose_result_html)
         self.choose_result_text_btn.clicked.connect(self.choose_result_text)
+        self.choose_video_path_btn.clicked.connect(self.choose_video_path)
 
 
     def read_setting(self):
@@ -35,6 +36,7 @@ class SettingDialog(QtWidgets.QDialog,Ui_Dialog):
         self.car_weight.setText(self.conf.CAR_WEIGHT)
         self.bike_weight.setText(self.conf.BIKE_WEIGHT)
 
+        self.default_video_path.setText(self.conf.DEFAULT_VIDEO_PATH)
         self.default_result_path.setText(self.conf.DEFAULT_RESULT_PATH)
         self.default_result_text.setText(self.conf.PREDICT_RESULT_PATH)
         self.default_result_html.setText(self.conf.PREDICT_RESULT_IMAGE)
@@ -42,6 +44,8 @@ class SettingDialog(QtWidgets.QDialog,Ui_Dialog):
         self.max_image_num.setText(self.conf.MAX_SAVED_IMAGE)
 
     def confirm_setting(self):
+        self.conf.set_config_file("global setting","default_video_path",
+                                  self.default_video_path.text())
         self.conf.set_config_file("global setting","default_result_path",
                                     self.default_result_path.text())
         self.conf.set_config_file("global setting", "predict_result_image",
@@ -96,5 +100,9 @@ class SettingDialog(QtWidgets.QDialog,Ui_Dialog):
         if path != '':
             self.default_result_text.setText(path)
 
+    def choose_video_path(self):
+        path = QtWidgets.QFileDialog.getExistingDirectory(self, '选择路径', r'my_dataset/')
+        if path != '':
+            self.default_video_path.setText(path)
 
 

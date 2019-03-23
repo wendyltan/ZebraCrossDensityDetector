@@ -63,9 +63,6 @@ class Ui_MainWindow(object):
         self.chooseImageBtn = QtWidgets.QPushButton(self.imageOptions)
         self.chooseImageBtn.setGeometry(QtCore.QRect(270, 10, 93, 28))
         self.chooseImageBtn.setObjectName("chooseImageBtn")
-        self.chooseDirBtn = QtWidgets.QPushButton(self.imageOptions)
-        self.chooseDirBtn.setGeometry(QtCore.QRect(270, 50, 93, 28))
-        self.chooseDirBtn.setObjectName("chooseDirBtn")
         self.imagePathLineEdit = QtWidgets.QLineEdit(self.imageOptions)
         self.imagePathLineEdit.setGeometry(QtCore.QRect(200, 100, 231, 21))
         self.imagePathLineEdit.setObjectName("imagePathLineEdit")
@@ -145,7 +142,6 @@ class Ui_MainWindow(object):
         self.singleImageCheckbox.setText(_translate("MainWindow", "单张图片"))
         self.imageDirCheckbox.setText(_translate("MainWindow", "多张图片的目录"))
         self.chooseImageBtn.setText(_translate("MainWindow", "选择图片"))
-        self.chooseDirBtn.setText(_translate("MainWindow", "选择目录"))
         self.label_4.setText(_translate("MainWindow", "文件或者目录"))
         self.resultArea.setTitle(_translate("MainWindow", "结果显示区域"))
         self.groupBox_4.setTitle(_translate("MainWindow", "图片视频显示区域"))
@@ -162,5 +158,6 @@ class Ui_MainWindow(object):
         self.actioncommon_setting.setText(_translate("MainWindow", "common setting"))
         self.actionuse_camera_as_input.setText(_translate("MainWindow", "use camera as input"))
         self.actionuse_video_file_as_input.setText(_translate("MainWindow", "use video file as input"))
+
 
 

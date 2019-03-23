@@ -16,7 +16,7 @@ class Config(object):
 
     def set_config_file(self,section,key,new_value):
         self.conf.set(section,key,new_value)
-        self.conf.write(open("config.ini", "w"))
+        self.write_config_file()
 
     def write_config_file(self):
         self.conf.write(open("config.ini","w"))
@@ -28,6 +28,7 @@ class Config(object):
         self.SINGLE_NET_NAME = self.conf.get("global setting", "single_net_name")
         self.NET_POSITION = self.conf.get("global setting", "net_position")
         self.DEFAULT_VIDEO_SOURCE = self.conf.get("global setting","default_video_source")
+        self.DEFAULT_VIDEO_PATH = self.conf.get("global setting","default_video_path")
         self.ICON_PATH = self.conf.get("global setting","icon_path")
         self.DEFAULT_RESULT_PATH = self.conf.get("global setting","default_result_path")
         self.MAX_SAVED_IMAGE = self.conf.get("global setting","max_saved_image")

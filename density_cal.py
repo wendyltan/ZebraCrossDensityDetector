@@ -167,13 +167,4 @@ def write_density(result):
 
 if __name__ == '__main__':
     pass
-    # #can only use relative directory,why?
-    # image_path = 'C:/Users/Wendyltanpcy/Desktop/毕业设计/ZebraCrossDensityDetector/5.jpg'.split('/')
-    # path = ''
-    # image_path = ('\\\\').join(image_path)
-    # print(image_path)
-    # zebra = Zebra('one_zebra','muti')
-    # print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-    #
-    # zebra_cross(get_predictions(zebra,'image',image_path),zebra)
 
