@@ -9,7 +9,7 @@ import inspect
 import os
 import cv2
 from PIL import Image
-
+import shutil
 
 def pull_image(directory,index):
 
@@ -45,6 +45,10 @@ def mkdir(path):
     :return:
     '''
     if not os.path.exists(path):
+        os.makedirs(path)
+        print('make result directory success')
+    else:
+        shutil.rmtree(path)
         os.makedirs(path)
         print('make result directory success')
 

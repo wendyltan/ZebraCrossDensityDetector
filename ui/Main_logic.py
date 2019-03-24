@@ -8,13 +8,11 @@
 
 import sys
 import time
-from turtledemo.nim import COLOR
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QUrl, QMutexLocker, QThread, pyqtSignal, QObject, QMutex, QTimer
-from PyQt5.QtGui import QIcon, QImage, QPixmap
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QIcon, QImage, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import QGraphicsScene
-from cv2 import cvtColor
 
 import density_cal as dcl
 from utils import helper as hp
@@ -26,7 +24,6 @@ from ui.Setting_logic import SettingDialog
 from PyQt5 import QtCore,QtGui
 from PyQt5.QtWebEngineWidgets import *
 import cv2
-
 # init the config object
 C = C()
 
@@ -74,29 +71,91 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.imageDirCheckbox.clicked.connect(self.image_mode_select)
         self.chooseImageBtn.clicked.connect(self.single_image)
 
-        self.chooseVideoType.activated[str].connect(self.select_videoType)
-        self.cap = cv2.VideoCapture()
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.showFrame)
+        self.frame_num = 0
 
 
         sys.stdout = EmittingStream(textWritten=self.normalOutputWritten)
         sys.stderr = EmittingStream(textWritten=self.normalOutputWritten)
 
+
     def showFrame(self):
+        self.cap = cv2.VideoCapture(self.video_source)
         if self.cap.isOpened():
-            ret,frame = self.cap.read()
+            self.judge_mode(C.DEFAULT_VIDEO_SOURCE)
+        else:
+            self.cap.release()
+
+    def judge_mode(self, from_which=''):
+        self.result_path = ''
+        if self.mode == 'image':
+            base_dir = 'my_dataset/zebra_'
+            self.result_path = base_dir + self.tag
+            hp.mkdir(self.result_path)
+        elif self.mode == 'video' and from_which != '':
+            base_dir = 'my_dataset/video_'
+            self.result_path = base_dir + self.tag
+            hp.mkdir(self.result_path)
+            if from_which == 'camera':
+                self.imageCapture()
+            elif from_which == 'video_file':
+                self.readVideo()
+
+
+    def readVideo(self):
+
+        ret = self.cap.read()
+        fps = self.cap.get(cv2.CAP_PROP_FPS)
+        counter = 1
+        # save image every 5 seconds
+        timeF = fps * 5
+        print('Start to save frame from video every ', timeF, ' frame')
+        i = 0
+        while ret:  # read video frame
+            ret, frame = self.cap.read()
             if ret:
                 self.showImage(frame)
-            else:
-                self.cap.release()
-                self.timer.stop()
+            if (counter % timeF == 0):  # every timeF frame do the saving
+                i += 1
+                print('Saving frame', counter)
+                cv2.imwrite(self.result_path + '/' + str(i) + '.jpg', frame)  # save the frame picture
+            counter += 1
+            cv2.waitKey(1)
+            if i == self.frame_num and self.frame_num !=0:
+                break
+
+        # record frame num to do right predict
+        self.frame_num = i
+        self.cap.release()
+
+    def imageCapture(self):
+        image_Count = 1
+        fps = self.cap.get(cv2.CAP_PROP_FPS)
+        timeF = fps * 5
+        print('Current fps:', fps)
+        counter = 0
+        while True:
+            ret, frame = self.cap.read()
+            self.showImage(frame)
+            # what is this magical statement?
+            cv2.waitKey(1) & 0xFF
+            # save image every 150 frame on my computer / 5 seconds
+            if (counter % timeF) == 0:
+                cv2.imwrite("%s/%d.jpg" % (self.result_path, image_Count),
+                            cv2.resize(frame, (500, 375), interpolation=cv2.INTER_AREA))
+                print(u"%s:第 %d 张图片" % (self.result_path, image_Count))
+                if image_Count == int(C.MAX_SAVED_IMAGE):  # exit
+                    break
+                image_Count += 1
+            counter += 1
+
+        self.cap.release()
+
 
     def showImage(self,src_img):
         src_img = cv2.cvtColor(src_img,cv2.COLOR_BGR2RGB)
         height,width,bytesPerComponent = src_img.shape
-        bytesPerLine = bytesPerComponent * width
-        q_image = QImage(src_img.data,width,height,bytesPerLine,QImage.Format_RGB888)
+        # bytesPerLine = bytesPerComponent * width
+        q_image = QImage(src_img.data,width,height,QImage.Format_RGB888)
         img = q_image.scaled(self.graphicsView.width(), self.graphicsView.height())
         scene = QGraphicsScene()
         scene.addPixmap(QPixmap().fromImage(img))
@@ -134,10 +193,11 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         about_dialog.show()
         about_dialog.exec_()
 
-    def do_detect(self,image_path):
+    def do_detect(self):
+
         zebra = Zebra(self.chooseZebraCombo.currentText(), self.chooseModelCombo.currentText())
         print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-        dcl.zebra_cross(dcl.get_predictions(zebra, self.mode, image_path), zebra)
+        dcl.zebra_cross(dcl.get_predictions(zebra, self.mode, self.image_path), zebra)
 
         latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
         file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
@@ -146,44 +206,49 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
     def start_detect(self):
 
-        image_path = ''
+        self.image_path = ''
+        self.statusBrowser.clear()
+
         if self.mode == 'image' and self.image_mode == 'single':
             # only predict by one zebra when image is only single
             self.chooseZebraCombo.setCurrentIndex(0)
-            image_path = self.imagePathLineEdit.text()
-            self.do_detect(image_path)
+            self.image_path = self.imagePathLineEdit.text()
+            self.do_detect()
             file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH+'/')
             file_path = hp.load_file(C.DEFAULT_RESULT_PATH+'/'+file_name)
             self.set_image_view(file_path)
 
         elif self.mode == 'image' and self.image_mode == 'directory':
-            self.do_detect(image_path)
+            self.do_detect()
         elif self.mode == 'video':
+
+            # change videoType as soon as possible
+            self.select_videoType()
+            C.read_config_file()
+
             if self.chooseVideoType.currentText() == 'video_file':
                 # open video dialog
                 base_path = C.DEFAULT_VIDEO_PATH
                 if self.chooseZebraCombo.currentText() == 'one_zebra':
-                    path = base_path+'people.mp4'
-                    self.cap.open(path)
-                    self.timer.start(30)
+                    self.tag = 'people'
+                    self.video_source = base_path+self.tag+'.mp4'
+                    self.showFrame()
                 elif self.chooseZebraCombo.currentText() == 'tri_zebra' or\
                     self.chooseZebraCombo.currentText() == 'rec_zebra':
-
-                    # not yet complete for playing two video one by one
-                    path = base_path+'people.mp4'
-                    self.cap.open(path)
-                    self.timer.start(30)
-                    path = base_path+'cars.mp4'
-                    self.cap.open(path)
-                    self.timer.start(30)
-
+                    print('Read people video first...')
+                    self.tag = 'people'
+                    self.video_source = base_path + self.tag + '.mp4'
+                    self.showFrame()
+                    print('Read cars video then...')
+                    self.tag = 'cars'
+                    self.video_source = base_path + self.tag + '.mp4'
+                    self.showFrame()
             elif self.chooseVideoType.currentText() == 'camera':
-                pass
-                # show camera
-            self.do_detect(image_path)
-
-
-
+                # only support one zebra for now
+                self.tag = 'people'
+                self.video_source = 0
+                self.showFrame()
+            self.do_detect()
 
 
 
