@@ -109,4 +109,3 @@ venv.bak/
 /.idea/
 /predict_image/
 /predict_text/
-/train_data/
