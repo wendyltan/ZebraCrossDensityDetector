@@ -10,7 +10,8 @@ import os
 import cv2
 from PIL import Image
 import shutil
-
+from config import Config as C
+C = C()
 def pull_image(directory,index):
 
     '''
@@ -46,11 +47,14 @@ def mkdir(path):
     '''
     if not os.path.exists(path):
         os.makedirs(path)
-        print('make result directory success')
+        print('make directory ' ,path,' success')
     else:
-        shutil.rmtree(path)
-        os.makedirs(path)
-        print('make result directory success')
+        if path == C.DEFAULT_RESULT_PATH or path == C.DEFAULT_VIDEO_PATH:
+            pass
+        else:
+            shutil.rmtree(path)
+            os.makedirs(path)
+            print('remake directory ',path, ' success')
 
 def load_file(relative_path):
 

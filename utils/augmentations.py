@@ -367,7 +367,7 @@ class SwapChannels(object):
             a tensor with channels swapped according to swap
         """
         # if torch.is_tensor(image):
-        #     image = image.data.cpu().numpy()
+        #     image = image.train_data.cpu().numpy()
         # else:
         #     image = np.array(image)
         image = image[:, :, self.swaps]

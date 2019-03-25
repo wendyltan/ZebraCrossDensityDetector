@@ -165,6 +165,3 @@ def write_density(result):
     fileObject.write(preObj)
     fileObject.close()
 
-if __name__ == '__main__':
-    pass
-

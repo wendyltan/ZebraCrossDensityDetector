@@ -105,7 +105,8 @@ venv.bak/
 /ssd300_120000/
 /weights/
 /my_dataset/
-/data/VOCdevkit/
+/train_data/VOCdevkit/
 /.idea/
 /predict_image/
 /predict_text/
+/train_data/

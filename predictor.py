@@ -11,8 +11,8 @@ import torch
 from torch.autograd import Variable
 from model.Predictions import Predictions
 from utils import helper as hp
-from data import BaseTransform, VOC_CLASSES as labelmap
-from ssd import build_ssd
+from train_data import BaseTransform, VOC_CLASSES as labelmap
+from traning.ssd import build_ssd
 from config import Config as C
 
 C = C()
@@ -80,15 +80,11 @@ def get_predicts(cross_type, transform, net,image_or_video,image_path):
         print('Do the prediction of people first...')
         print('*' * 100 + '>')
         path = judge_mode(image_or_video, tag[0],C.DEFAULT_VIDEO_SOURCE)
-        if image_path !='':
-            path = ''
         total['people'] = core_predict(path, transform, net, tag[0],image_path)
 
         print('Now doing the predictions of cars...')
         print('*' * 100 + '>')
         path = judge_mode(image_or_video, tag[1],C.DEFAULT_VIDEO_SOURCE)
-        if image_path !='':
-            path = ''
         total['cars'] = core_predict(path, transform, net, tag[1],image_path)
     return total
 

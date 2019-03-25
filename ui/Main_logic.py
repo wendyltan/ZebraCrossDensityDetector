@@ -7,8 +7,6 @@
 # @Software: PyCharm
 
 import sys
-import time
-
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QDesktopServices
@@ -28,6 +26,7 @@ import cv2
 C = C()
 
 
+
 class EmittingStream(QtCore.QObject):
     textWritten = QtCore.pyqtSignal(str)
 
@@ -36,6 +35,8 @@ class EmittingStream(QtCore.QObject):
 
 
 class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
+
+
     def __init__(self):
         super(MainWindow,self).__init__()
         self.setupUi(self)
@@ -62,14 +63,16 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.mode = 'image'
         self.imageOptions.setEnabled(True)
         self.videoOptions.setEnabled(False)
-        self.action_image_mode.changed.connect(self.mode_change)
-        self.action_video_mode.changed.connect(self.mode_change)
 
         self.image_mode = 'single'
         self.singleImageCheckbox.setChecked(True)
         self.singleImageCheckbox.clicked.connect(self.image_mode_select)
         self.imageDirCheckbox.clicked.connect(self.image_mode_select)
         self.chooseImageBtn.clicked.connect(self.single_image)
+
+        self.action_image_mode.triggered.connect(self.get_image_checked)
+        self.action_video_mode.triggered.connect(self.get_video_checked)
+
 
         self.frame_num = 0
 
@@ -154,8 +157,8 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
     def showImage(self,src_img):
         src_img = cv2.cvtColor(src_img,cv2.COLOR_BGR2RGB)
         height,width,bytesPerComponent = src_img.shape
-        # bytesPerLine = bytesPerComponent * width
-        q_image = QImage(src_img.data,width,height,QImage.Format_RGB888)
+        bytesPerLine = bytesPerComponent * width
+        q_image = QImage(src_img.data,width,height,bytesPerLine,QImage.Format_RGB888)
         img = q_image.scaled(self.graphicsView.width(), self.graphicsView.height())
         scene = QGraphicsScene()
         scene.addPixmap(QPixmap().fromImage(img))
@@ -166,8 +169,9 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         type = self.chooseVideoType.currentText()
         C.set_config_file("global setting","default_video_source",type)
 
+
     def single_image(self):
-        # open one single image with file dialog and place it to the graphical view
+
         file_name,_ = QtWidgets.QFileDialog.getOpenFileName(self,'打开图片',r'my_dataset/', 'Image Files(*.jpg *.jpeg *.png)')
         self.imagePathLineEdit.setText(file_name)
         self.set_image_view(file_name)
@@ -199,10 +203,17 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
         dcl.zebra_cross(dcl.get_predictions(zebra, self.mode, self.image_path), zebra)
 
+        self.statusBar().showMessage('showing result html chart...')
         latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
         file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
         self.webView.load(QUrl.fromLocalFile(file_path))
 
+
+    def open_up_desktop_files(self,path):
+
+        desktopService = QDesktopServices()
+        path_url = hp.load_file(path).replace('/','\\').replace('\\','\\\\')
+        desktopService.openUrl(QUrl('file:///'+path_url))
 
     def start_detect(self):
 
@@ -214,6 +225,8 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.chooseZebraCombo.setCurrentIndex(0)
             self.image_path = self.imagePathLineEdit.text()
             self.do_detect()
+
+            # set image to the grahicalview
             file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH+'/')
             file_path = hp.load_file(C.DEFAULT_RESULT_PATH+'/'+file_name)
             self.set_image_view(file_path)
@@ -225,10 +238,11 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             # change videoType as soon as possible
             self.select_videoType()
             C.read_config_file()
+            self.open_up_desktop_files(C.DEFAULT_VIDEO_PATH)
 
             if self.chooseVideoType.currentText() == 'video_file':
-                # open video dialog
                 base_path = C.DEFAULT_VIDEO_PATH
+
                 if self.chooseZebraCombo.currentText() == 'one_zebra':
                     self.tag = 'people'
                     self.video_source = base_path+self.tag+'.mp4'
@@ -249,6 +263,9 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
                 self.video_source = 0
                 self.showFrame()
             self.do_detect()
+            self.statusBar().showMessage('detect and caculating...')
+        self.statusBar().showMessage('open up result path success')
+        self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
 
 
 
@@ -269,21 +286,24 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.statusBrowser.setTextCursor(cursor)
         self.statusBrowser.ensureCursorVisible()
 
-
-    def mode_change(self):
-        if self.mode == 'video' and self.action_video_mode.isChecked():
+    def get_image_checked(self):
+        if self.action_image_mode.isChecked():
             self.action_image_mode.setChecked(True)
             self.action_video_mode.setChecked(False)
             self.mode = 'image'
             self.imageOptions.setEnabled(True)
             self.videoOptions.setEnabled(False)
+            self.statusBar().showMessage('image mode')
 
-        elif self.mode == 'image' and self.action_image_mode.isChecked():
-            self.action_image_mode.setChecked(False)
+
+    def get_video_checked(self):
+        if self.action_video_mode.isChecked():
             self.action_video_mode.setChecked(True)
+            self.action_image_mode.setChecked(False)
             self.mode = 'video'
             self.videoOptions.setEnabled(True)
             self.imageOptions.setEnabled(False)
+            self.statusBar().showMessage('video mode')
 
 
 
@@ -293,10 +313,14 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.chooseImageBtn.setEnabled(False)
             self.image_mode = 'directory'
             self.imagePathLineEdit.setText('search under my_dataset/')
+            self.statusBar().showMessage('image directory mode')
         elif self.image_mode == 'directory' and self.singleImageCheckbox.isChecked():
             self.imageDirCheckbox.setChecked(False)
             self.image_mode = 'single'
             self.chooseImageBtn.setEnabled(True)
+            self.statusBar().showMessage('single image mode')
+
+
 
 
 

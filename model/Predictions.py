@@ -12,7 +12,7 @@ PREDICT_RESULT_PATH = C().PREDICT_RESULT_PATH
 
 class Predictions(object):
     '''
-    Class that deal with predict data saving and reading
+    Class that deal with predict train_data saving and reading
     '''
 
     def __init__(self,image_name,type):
