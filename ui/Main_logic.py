@@ -8,12 +8,13 @@
 
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import QGraphicsScene
 
 import density_cal as dcl
 from model.ProgramEntity import ProgramEntity
+from ui.Auto_logic import AutoPrepare
 from utils import helper as hp
 from model.Zebra import Zebra
 from ui.MainWindow import Ui_MainWindow
@@ -41,9 +42,10 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
     def __init__(self):
         super(MainWindow,self).__init__()
         self.setupUi(self)
+        self.setFixedSize(1121, 722)
 
         self.webView = QWebEngineView(self.resultArea)
-        self.webView.setGeometry(QtCore.QRect(0, 20, 481, 281))
+        self.webView.setGeometry(QtCore.QRect(20, 30, 461, 271))
         self.webView.setObjectName("webView")
         self.webView.show()
 
@@ -53,6 +55,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
         self.actionabout.triggered.connect(self.about)
         self.actioncommon_setting.triggered.connect(self.setting)
+        self.actionauto_prepare.triggered.connect(self.auto_prepare)
 
         self.chooseModelCombo.addItems(['single','muti'])
         self.chooseZebraCombo.addItems(['one_zebra','tri_zebra','rec_zebra'])
@@ -80,6 +83,8 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
         sys.stdout = EmittingStream(textWritten=self.normalOutputWritten)
         sys.stderr = EmittingStream(textWritten=self.normalOutputWritten)
+
+
 
 
     def showFrame(self):
@@ -188,15 +193,27 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
     def setting(self):
         setting_dialog = SettingDialog()
         setting_dialog.setWindowIcon(self.windowIcon())
+        setting_dialog.setWindowModality(Qt.ApplicationModal)
         setting_dialog.show()
         setting_dialog.exec_()
+
+
 
 
     def about(self):
         about_dialog = AboutDialog()
         about_dialog.setWindowIcon(self.windowIcon())
+        about_dialog.setWindowModality(Qt.ApplicationModal)
         about_dialog.show()
         about_dialog.exec_()
+
+
+    def auto_prepare(self):
+        prepare_dialog = AutoPrepare()
+        prepare_dialog.setWindowIcon(self.windowIcon())
+        prepare_dialog.setWindowModality(Qt.ApplicationModal)
+        prepare_dialog.show()
+        prepare_dialog.exec_()
 
     def do_detect(self):
 

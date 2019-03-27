@@ -8,7 +8,7 @@ To run my program,first you should check for the things below:
 - Make sure you have an GPU compatible for the training.
 - Make a directory under project root named weights/, download **vgg16_reducedfc.pth** base trainning network.
 - Make a directory under project root named **my_dataset/**.
-- Under two subdirectories  **my_dataset/zebra_cars** and **my_dataset/zebra_people** , put in your test images.remember to named them with thier index.like,`1.jpg` at image mode.In video mode image saving is auto.
+- Use `快速部署` to set up necessary data folders for detecting.
 - Download your VOC train dataset to data/, use shell script in data/script to help you do that.
 
 &nbsp;
@@ -22,7 +22,6 @@ If you finish all the above,then you are good to go.
 ### Basic steps of the whole process
 1. Run `train.py` to train network. feel free to adjust the parameters yourself cause I don't really know what's the best parameter either.
 2. Run `eval.py` to caculate the APs and mAP to see how precise can the network be.
-3. Use `auto_prepare.py` to do auto set up jobs for image and video rename and copy.
 3. Run `gui.py` and choose your mode to calculate the density of image or video stream!
 
 ## Notification
@@ -35,14 +34,10 @@ If you finish all the above,then you are good to go.
 ## TODO
 The part I hope to complete in the near future
 - Still to come:
-  * [x] Complete support for image and video steam detect.
-  * [x] Add ploty figure to draw chart of the result as record.
-  * [x] Build an elegant ui based on PyQt5.
   * [ ] Figure out the best wait to caulate density.
-  * [x] Connect gui with video function
   * [ ] Add more chart types for result display if needed.
   * [ ] Do refactor to make codes more readable.
-  * [ ] Combine `auto_prepare.py` with user interface.
-  * [ ] 编写开题和中期检查表
-  * [x] Add video read support for current video detect function.
+  * [x] Combine `auto_prepare.py` with user interface.
+  * [x] 编写开题和中期检查表
+
 

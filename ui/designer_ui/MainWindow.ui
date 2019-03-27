@@ -304,8 +304,15 @@
     </property>
     <addaction name="actionabout"/>
    </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>快速部署</string>
+    </property>
+    <addaction name="actionauto_prepare"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_4"/>
    <addaction name="menu_3"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -361,6 +368,11 @@
   <action name="actionuse_video_file_as_input">
    <property name="text">
     <string>use video file as input</string>
+   </property>
+  </action>
+  <action name="actionauto_prepare">
+   <property name="text">
+    <string>auto prepare</string>
    </property>
   </action>
  </widget>

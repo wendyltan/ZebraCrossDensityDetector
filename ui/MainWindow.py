@@ -90,6 +90,8 @@ class Ui_MainWindow(object):
         self.menu_2.setObjectName("menu_2")
         self.menu_3 = QtWidgets.QMenu(self.menubar)
         self.menu_3.setObjectName("menu_3")
+        self.menu_4 = QtWidgets.QMenu(self.menubar)
+        self.menu_4.setObjectName("menu_4")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -115,13 +117,17 @@ class Ui_MainWindow(object):
         self.actionuse_camera_as_input.setObjectName("actionuse_camera_as_input")
         self.actionuse_video_file_as_input = QtWidgets.QAction(MainWindow)
         self.actionuse_video_file_as_input.setObjectName("actionuse_video_file_as_input")
+        self.actionauto_prepare = QtWidgets.QAction(MainWindow)
+        self.actionauto_prepare.setObjectName("actionauto_prepare")
         self.menu_choose_mode.addAction(self.action_image_mode)
         self.menu_choose_mode.addAction(self.action_video_mode)
         self.menu.addAction(self.menu_choose_mode.menuAction())
         self.menu_2.addAction(self.actioncommon_setting)
         self.menu_3.addAction(self.actionabout)
+        self.menu_4.addAction(self.actionauto_prepare)
         self.menubar.addAction(self.menu.menuAction())
         self.menubar.addAction(self.menu_2.menuAction())
+        self.menubar.addAction(self.menu_4.menuAction())
         self.menubar.addAction(self.menu_3.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -149,6 +155,7 @@ class Ui_MainWindow(object):
         self.menu_choose_mode.setTitle(_translate("MainWindow", "choose_mode"))
         self.menu_2.setTitle(_translate("MainWindow", "参数设置"))
         self.menu_3.setTitle(_translate("MainWindow", "关于"))
+        self.menu_4.setTitle(_translate("MainWindow", "快速部署"))
         self.actiondensity_setting.setText(_translate("MainWindow", "density setting"))
         self.actionglobal_setting.setText(_translate("MainWindow", "global setting"))
         self.actionweight_setting.setText(_translate("MainWindow", "weight setting"))
@@ -158,6 +165,6 @@ class Ui_MainWindow(object):
         self.actioncommon_setting.setText(_translate("MainWindow", "common setting"))
         self.actionuse_camera_as_input.setText(_translate("MainWindow", "use camera as input"))
         self.actionuse_video_file_as_input.setText(_translate("MainWindow", "use video file as input"))
-
+        self.actionauto_prepare.setText(_translate("MainWindow", "auto prepare"))
 
 

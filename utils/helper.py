@@ -39,6 +39,7 @@ def image_resize(file_path):
     out = im.resize((new_x, new_y), Image.ANTIALIAS)
     out.save(file_path)
 
+
 def mkdir(path):
     '''
     Make a new directory to store result pictures
@@ -48,13 +49,11 @@ def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
         print('make directory ' ,path,' success')
-    else:
-        if path == C.DEFAULT_VIDEO_PATH:
-            pass
-        else:
-            shutil.rmtree(path)
-            os.makedirs(path)
-            print('remake directory ',path, ' success')
+
+def remake_dir(path):
+    shutil.rmtree(path)
+    os.makedirs(path)
+    print('remake directory ',path, ' success')
 
 def load_file(relative_path):
 

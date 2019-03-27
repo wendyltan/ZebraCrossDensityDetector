@@ -16,6 +16,7 @@ class SettingDialog(QtWidgets.QDialog,Ui_Dialog):
         self.conf = C()
         self.setupUi(self)
         self.setWindowTitle('设置')
+        self.setFixedSize(610, 695)
         self.read_setting()
         self.confirmBtn.clicked.connect(self.confirm_setting)
         self.cancelBtn.clicked.connect(self.close)

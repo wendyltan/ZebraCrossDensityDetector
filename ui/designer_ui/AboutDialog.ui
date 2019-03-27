@@ -29,16 +29,6 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QTextBrowser" name="textBrowser">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>30</y>
-     <width>461</width>
-     <height>271</height>
-    </rect>
-   </property>
-  </widget>
  </widget>
  <resources/>
  <connections>
