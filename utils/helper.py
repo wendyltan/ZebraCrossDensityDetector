@@ -49,7 +49,7 @@ def mkdir(path):
         os.makedirs(path)
         print('make directory ' ,path,' success')
     else:
-        if path == C.DEFAULT_RESULT_PATH or path == C.DEFAULT_VIDEO_PATH:
+        if path == C.DEFAULT_VIDEO_PATH:
             pass
         else:
             shutil.rmtree(path)

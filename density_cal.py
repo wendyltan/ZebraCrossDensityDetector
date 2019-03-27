@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/3/10 14:58
 # @Author  : wendy
-# @Usage   : For weight definition and density calculation
+# @Usage   : Receive prediction result and make density calculation
 # @File    : density_cal.py
 # @Software: PyCharm
 import json
@@ -10,23 +10,28 @@ import os
 from config import Config as C
 from model import Weight
 import predictor as pd
+from model.ProgramEntity import ProgramEntity
 from model.Zebra import Zebra
 import draw_chart as dc
 
 C = C()
 
 def core_density(zebra_type,predictions,density):
-    '''
-    Core density calculation
-    :param zebra_type:
-    :param predictions:
-    :param density:
+
+    """
+    Core caculation of density
+    :param zebra_type: zebra_cross type
+    :param predictions: a dictionary
+    :param density: a dictionary,could be empty
     :return:
-    '''
+    """
+
     if density == {}:
         flag = True
     else:
         flag = False
+
+
     for image, result in predictions.items():
         if flag:
             density[image] = 0
@@ -51,34 +56,34 @@ def core_density(zebra_type,predictions,density):
     return density
 
 def single_model_caculation(zebra,predictions):
-    '''
-    Single model density caculate
-    :param zebra_type:
-    :param predictions:
+    """
+    Caculate density with single model
+    :param zebra: zebra object
+    :param predictions: a result dictionary
     :return:
-    '''
+    """
 
     density = {}
     zebra_type = zebra.get_type()
-    if zebra_type == 'one_zebra':
+    if zebra.is_one_zebra():
         density = core_density(zebra_type,predictions,density)
-    elif zebra_type == 'tri_zebra' or zebra_type == 'rec_zebra':
+    elif not zebra.is_one_zebra():
         people = predictions['people']
         cars = predictions['cars']
+
         # caculate the cars density then substract the people density
         people_density = core_density(zebra_type,people,density)
         density = core_density(zebra_type, cars, people_density)
 
-
     return density
 
 def muti_model_caculation(zebra,predictions):
-    '''
-    Mutiple models density caculate
-    :param zebra_type:
-    :param predictions:
+    """
+    Caculate density with multiple models
+    :param zebra: zebra object
+    :param predictions: a result dictionary
     :return:
-    '''
+    """
 
     muti_density = {}
     model_num = 0
@@ -96,66 +101,88 @@ def muti_model_caculation(zebra,predictions):
     return muti_density,model_num
 
 
-def zebra_cross(predictions,zebra):
-    '''
-    Get density caculation result and check if too crowded
-    :param mode:
-    :param predictions:
-    :param zebra:
+def get_caculations(predictions, pe):
+    """
+    Get caculation result and write into files,draw on chart.
+    :param predictions: predictions dictionary
+    :param pe: program entity
     :return:
-    '''
+    """
+
     result_set = {}
-    mode = zebra.get_mode()
-    if mode == 'single':
+    model_num = 1
+    zebra = pe.get_zebra()
+
+
+    if pe.is_current_model_single():
         result_set = single_model_caculation(zebra,predictions)
-        model_num = 1
-    elif mode == 'muti':
+    elif not pe.is_current_model_single():
         result_set,model_num = muti_model_caculation(zebra,predictions)
-    print(result_set)
-    dc.draw(result_set, zebra,model_num)
+
+    print("Final result of density caculation: ",result_set)
+
+    dc.draw(result_set,zebra,model_num)
+
     for image,density in result_set.items():
         if zebra.is_over_max(density,model_num):
-            result_set[image] = str(density) +' over_max'
             print(image,'density over max!too crowded around')
+
     write_density(result_set)
 
 
 
-def get_predictions(zebra,image_or_video,image_path):
-    '''
-    Get the predictions from detect and unpack
-    :param zebra:
+def get_predictions(pe):
+    """
+    Get prediction result from predictor module
+    :param pe: program entity
     :return:
-    '''
-    mode = zebra.get_mode()
-    type = zebra.get_type()
+    """
+
+    result = pd.predict(pe)
+    predictions = unpack_predict(result,pe)
+    print("Final predictions of all images: ", predictions)
+
+    return predictions
+
+def unpack_predict(result,pe):
+    """
+    Unpack prediction result and read from pre-saved files
+    :param result: prediction dictionary packed by Predictions objects
+    :param pe: program entity
+    :return:
+    """
+
+    zebra = pe.get_zebra()
+    image_path = pe.get_image_path()
+
     predictions = {}
-    # currently only support image mode
-
-    result = pd.predict(zebra, image_or_video,image_path)
-
-    # unpack predict result
-    if mode == 'muti':
+    if not pe.is_current_model_single():
         for model, prediction in result.items():
             pre = {}
-            if image_path !='':
+            if image_path != '':
                 predictions[model] = prediction.read_predict_result()
             else:
                 for class_name, predict in prediction.items():
                     pre[class_name] = predict.read_predict_result()
                 predictions[model] = pre
-    elif mode == 'single':
-        if type == 'one_zebra':
+    elif pe.is_current_model_single():
+        if zebra.is_one_zebra():
             dic = result.read_predict_result()
             for name, predict in dic.items():
                 predictions[name] = predict
-        elif type == 'tri_zebra' or type == 'rec_zebra':
-            for name,predict in result.items():
+        elif not zebra.is_one_zebra():
+            for name, predict in result.items():
                 predictions[name] = predict.read_predict_result()
 
     return predictions
 
 def write_density(result):
+
+    """
+    write result into json file format
+    :param result:
+    :return:
+    """
 
     if not os.path.exists(C.PREDICT_RESULT_PATH):
         os.makedirs(C.PREDICT_RESULT_PATH)
@@ -165,3 +192,9 @@ def write_density(result):
     fileObject.write(preObj)
     fileObject.close()
 
+if __name__ == '__main__':
+    zebra = Zebra('one_zebra')
+    pe = ProgramEntity(zebra,'image','','single')
+    print('Applying scene: ', zebra.get_name(), '.Using model:',pe.get_current_model())
+    predictions = get_predictions(pe)
+    get_caculations(predictions, pe)

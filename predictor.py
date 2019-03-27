@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/3/10 14:59
 # @Author  : wendy
-# @Usage   : The predictions of image mode
+# @Usage   : Recognize images and give prediction result
 # @File    : predictor.py
 # @Software: PyCharm
 import os
@@ -17,98 +17,84 @@ from config import Config as C
 
 C = C()
 
-def predict(zebra,image_or_video,image_path=''):
-    '''
-    Make predictions according to the zebra cross type and mode
-    :param cross_type: one_zebra,tri_zebra or rec_zebra
-    :param mode: single or muti
+def predict(pe):
+    """
+    Start predict with single or multiple model
+    :param pe: program entity
     :return:
-    '''
-    mode = zebra.get_mode()
-    cross_type = zebra.get_type()
-    if mode == 'muti':
-        return muti_model_predict(cross_type,image_or_video,image_path)
-    elif mode == 'single':
-        return single_model_predict(cross_type,C.SINGLE_NET_NAME,image_or_video,image_path)
+    """
 
-def single_model_predict(cross_type,net_name,image_or_video,image_path):
+    if not pe.is_current_model_single():
+        return muti_model_predict(pe)
+    elif pe.is_current_model_single():
+        return single_model_predict(pe,C.SINGLE_NET_NAME)
+
+def single_model_predict(pe,net_name):
     '''
     Make predictions with single model
-    :param cross_type: one_zebra,tri_zebra or rec_zebra
+    :param pe: program entity
     :param net_name: Given ssd network name
     :return: a dictionary of the prediction
     '''
     print('Using model: ', net_name)
     net = ssd_net_init(net_name)
     transform = BaseTransform(net.size, (104, 117, 123))
-    return get_predicts(cross_type,transform, net.eval(),image_or_video,image_path)
+    pe.set_transform_and_net(transform,net.eval())
+    return get_predicts(pe)
 
-def muti_model_predict(cross_type,image_or_video,image_path):
+def muti_model_predict(pe):
     '''
     Make predictions with multiple models and use thier average.Based on single predict.
-    :param cross_type:  one_zebra,tri_zebra or rec_zebra
+    :param pe: program entity
     :return: a two-dimension dictionary of each model's prediction
     '''
     path = C.NET_POSITION
     models = os.listdir(path)  # 得到文件夹下的所有文件名称
     total_dict = {}
     for model in models:  # 遍历文件夹
-        total_dict[model] = single_model_predict(cross_type,model,image_or_video,image_path)
+        total_dict[model] = single_model_predict(pe,model)
         print('Predict with model',model,' end.')
         print('-' * 100)
     print('All predictions complete.')
     return total_dict
 
-def get_predicts(cross_type, transform, net,image_or_video,image_path):
+def get_predicts(pe):
+    """
+    Get predict according to the type of zebra cross
+    :param pe: program entity
+    :return: predict result dictionary
+    """
 
-    '''
-    Rely on core_predict
-    :param cross_type:
-    :param net:
-    :param transform:
-    :return:
-    '''
     tag = ['people','cars']
     total = {}
-    if cross_type == 'one_zebra':
-        path = judge_mode(image_or_video, tag[0],C.DEFAULT_VIDEO_SOURCE)
-        if image_path !='':
-            path = ''
-        total = core_predict(path, transform, net, tag[0],image_path)
-    elif cross_type == 'tri_zebra' or cross_type == 'rec_zebra':
+    zebra = pe.get_zebra()
+
+    if zebra.is_one_zebra():
+        dir = pe.get_image_source_path(tag[0])
+        total = core_predict(dir,tag[0],pe)
+    elif not zebra.is_one_zebra():
         # considering the influence of car of the crowd
         print('Do the prediction of people first...')
         print('*' * 100 + '>')
-        path = judge_mode(image_or_video, tag[0],C.DEFAULT_VIDEO_SOURCE)
-        total['people'] = core_predict(path, transform, net, tag[0],image_path)
+        dir = pe.get_image_source_path(tag[0])
+        total['people'] = core_predict(dir,tag[0],pe)
 
         print('Now doing the predictions of cars...')
         print('*' * 100 + '>')
-        path = judge_mode(image_or_video, tag[1],C.DEFAULT_VIDEO_SOURCE)
-        total['cars'] = core_predict(path, transform, net, tag[1],image_path)
+        dir = pe.get_image_source_path(tag[1])
+        total['cars'] = core_predict(dir,tag[1],pe)
+
     return total
 
+def core_predict(directory,tag,pe):
 
-def judge_mode(image_or_video,tag,from_which=''):
-    path = ''
-    if image_or_video == 'image':
-        base_dir = 'my_dataset/zebra_'
-        path = base_dir+tag
-    elif image_or_video == 'video' and from_which!='':
-        base_dir = 'my_dataset/video_'
-        path = base_dir+tag
-    return path
-
-
-def core_predict(directory,transform,net,tag,image_path):
-    '''
-    Core code of predictions
-    :param directory: directory to be read
-    :param transform:
-    :param net:
-    :param tag: people or cars
+    """
+    Core prediction of images
+    :param directory: image source directory
+    :param tag: people images or cars images
+    :param pe: program entity
     :return:
-    '''
+    """
 
     # path used for storing predictions results
     result_path = C.DEFAULT_RESULT_PATH
@@ -116,6 +102,9 @@ def core_predict(directory,transform,net,tag,image_path):
     # init the failed count
     failed_count = 0
     total_prediction = {}
+    image_path = pe.get_image_path()
+    transform = pe.get_transform()
+    net = pe.get_net()
 
     if image_path != '' and directory == '':
         image_numbers = 1
@@ -190,6 +179,7 @@ def core_predict(directory,transform,net,tag,image_path):
     return predict
 
 def ssd_net_init(trained_net_name):
+
     '''
     Init the ssd pre-trained network
     :param trained_net_name:

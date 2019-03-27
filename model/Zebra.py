@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/3/11 11:51
 # @Author  : wendy
-# @Usage   : 
+# @Usage   : The zebra object tends to deal with zebra cross infos
 # @File    : Zebra.py
 # @Software: PyCharm
 
@@ -15,7 +15,7 @@ MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA = int(config.MAX_ALLOWED_DENSITY_RECTANGLE_Z
 
 class Zebra(object):
 
-    def __init__(self,cross_type,mode='single'):
+    def __init__(self,cross_type):
         if cross_type == 'one_zebra':
             self.type = 'one_zebra'
             self.name = 'one zebra crossing'
@@ -28,29 +28,24 @@ class Zebra(object):
             self.type = 'rec_zebra'
             self.name = 'rectangle zebra crossing'
             self.max_density = MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA
-        self.mode = mode
+
+
+    def is_one_zebra(self):
+        if self.type == 'one_zebra':
+            return True
+        elif self.type == 'tri_zebra' or self.type == 'rec_zebra':
+            return False
+        else:
+            print('ILLEGAL ZEBRA TYPE(one_zebra/tri_zebra/rec_zebra')
+            return None
 
     def get_type(self):
         return self.type
     def get_name(self):
         return self.name
 
-    def get_mode(self):
-        return self.mode
-
-    def set_mode(self,mode):
-        if mode!='single' and mode != 'muti':
-            print('Mode can only be single or muti!')
-        else:
-            self.mode = mode
-
-
     def get_current_max_density(self):
         return self.max_density
-
-    def set_max_density(self,new_density):
-        self.max_density = new_density
-        print('Now the max density of ',self.get_name(),' is ',self.get_current_max_density())
 
     def is_over_max(self,density,model_num):
         if density > self.get_current_max_density()/model_num:

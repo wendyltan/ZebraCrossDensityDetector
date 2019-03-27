@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/3/12 11:15
 # @Author  : wendy
-# @Usage   : 
+# @Usage   : The predict object.Include some useful relative functions
 # @File    : Predictions.py
 # @Software: PyCharm
 import os

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/3/14 11:13
 # @Author  : wendy
-# @Usage   : Add or delete logic for main window here
+# @Usage   : Main Window logic
 # @File    : Main_logic.py
 # @Software: PyCharm
 
@@ -13,6 +13,7 @@ from PyQt5.QtGui import QIcon, QImage, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import QGraphicsScene
 
 import density_cal as dcl
+from model.ProgramEntity import ProgramEntity
 from utils import helper as hp
 from model.Zebra import Zebra
 from ui.MainWindow import Ui_MainWindow
@@ -199,9 +200,11 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
     def do_detect(self):
 
-        zebra = Zebra(self.chooseZebraCombo.currentText(), self.chooseModelCombo.currentText())
-        print('Applying scene: ', zebra.get_name(), '.Using mode:', zebra.get_mode())
-        dcl.zebra_cross(dcl.get_predictions(zebra, self.mode, self.image_path), zebra)
+        zebra = Zebra(self.chooseZebraCombo.currentText())
+        pe = ProgramEntity(zebra, self.mode, self.image_path, self.chooseModelCombo.currentText())
+        print('Applying scene: ', zebra.get_name(), '.Using model:', pe.get_current_model())
+        predictions = dcl.get_predictions(pe)
+        dcl.get_caculations(predictions, pe)
 
         self.statusBar().showMessage('showing result html chart...')
         latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
