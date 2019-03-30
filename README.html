@@ -13,7 +13,7 @@
 - Make sure you have an GPU compatible for the training.
 - Make a directory under project root named weights/, download <strong>vgg16_reducedfc.pth</strong> base trainning network.
 - Make a directory under project root named <strong>my_dataset/</strong>.
-- Under two subdirectories  <strong>my_dataset/zebra_cars</strong> and <strong>my_dataset/zebra_people</strong> , put in your test images.remember to named them with thier index.like,<code>1.jpg</code> at image mode.In video mode image saving is auto.
+- Use <code>快速部署</code> to set up necessary data folders for detecting.
 - Download your VOC train dataset to data/, use shell script in data/script to help you do that.</p>
 <p>&nbsp;
 Also,make sure you have set up your environment as what <a href="https://github.com/amdegroot/ssd.pytorch">ssd.pytorch</a> project told you.</p>
@@ -26,7 +26,6 @@ If you finish all the above,then you are good to go.</p>
 <ol>
 <li>Run <code>train.py</code> to train network. feel free to adjust the parameters yourself cause I don't really know what's the best parameter either.</li>
 <li>Run <code>eval.py</code> to caculate the APs and mAP to see how precise can the network be.</li>
-<li>Use <code>auto_prepare.py</code> to do auto set up jobs for image and video rename and copy.</li>
 <li>Run <code>gui.py</code> and choose your mode to calculate the density of image or video stream!</li>
 </ol>
 <h2>Notification</h2>
@@ -39,15 +38,10 @@ If you finish all the above,then you are good to go.</p>
 <h2>TODO</h2>
 <p>The part I hope to complete in the near future
 - Still to come:
-  * [x] Complete support for image and video steam detect.
-  * [x] Add ploty figure to draw chart of the result as record.
-  * [x] Build an elegant ui based on PyQt5.
   * [ ] Figure out the best wait to caulate density.
-  * [x] Connect gui with video function
   * [ ] Add more chart types for result display if needed.
   * [ ] Do refactor to make codes more readable.
-  * [ ] Combine <code>auto_prepare.py</code> with user interface.
-  * [ ] 编写开题和中期检查表
-  * [x] Add video read support for current video detect function.</p>
+  * [x] Combine <code>auto_prepare.py</code> with user interface.
+  * [x] 编写开题和中期检查表</p>
 </body>
 </html>

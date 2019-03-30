@@ -40,6 +40,7 @@ def single_model_predict(pe,net_name):
     net = ssd_net_init(net_name)
     transform = BaseTransform(net.size, (104, 117, 123))
     pe.set_transform_and_net(transform,net.eval())
+    pe.set_model_name(net_name)
     return get_predicts(pe)
 
 def muti_model_predict(pe):
@@ -101,17 +102,16 @@ def core_predict(directory,tag,pe):
     hp.mkdir(result_path)
     # init the failed count
     failed_count = 0
-    total_prediction = {}
     image_path = pe.get_image_path()
     transform = pe.get_transform()
     net = pe.get_net()
+    model_name = pe.get_model_name()
 
     if image_path != '' and directory == '':
         image_numbers = 1
     else:
         image_numbers = len(os.listdir(directory))
     predict = None
-
 
     for i in range(image_numbers):
 
@@ -136,8 +136,10 @@ def core_predict(directory,tag,pe):
 
         scale = torch.Tensor([width, height, width, height])
 
+
         pred_num = 0
-        predict = Predictions(img_name,tag)
+        predict = Predictions(img_name,tag,model_name)
+
 
         for i in range(detections.size(1)):
             j = 0
@@ -161,18 +163,17 @@ def core_predict(directory,tag,pe):
                 cv2.imwrite(result_path + '/result_' + tag+'_'+img_name, img)
 
                 pred_num += 1
-                print(str(pred_num) + ' ' + label_name + ' , score: ' +
-                      str(score) + ' position: ' + ' || '.join(str(c) for c in coords))
+                # print(str(pred_num) + ' ' + label_name + ' , score: ' +
+                #       str(score) + ' position: ' + ' || '.join(str(c) for c in coords))
                 predict.type_identify(label_name)
                 j += 1
 
 
-            predict.write_predict_result()
-
+        predict.write_predict_result('w')
         if not predict.get_predict_flag():
             failed_count += 1
-        predict.set_total_predict(total_prediction)
 
+    predict.write_total_predict(image_numbers)
     print('-' * 100)
     print(failed_count, 'of the images detect failed,total ', image_numbers, ' of images for dataset ',directory)
     print('-' * 100)

@@ -9,13 +9,14 @@
 # suit yourself to define the max
 from config import Config as C
 config = C()
-MAX_ALLOWED_DENSITY_ONE_ZEBRA = int(config.MAX_ALLOWED_DENSITY_ONE_ZEBRA)
-MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA = int(config.MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA)
-MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA = int(config.MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA)
+MAX_ALLOWED_DENSITY_ONE_ZEBRA = float(config.MAX_ALLOWED_DENSITY_ONE_ZEBRA)
+MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA = float(config.MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA)
+MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA = float(config.MAX_ALLOWED_DENSITY_RECTANGLE_ZEBRA)
 
 class Zebra(object):
 
     def __init__(self,cross_type):
+        self.config = config
         if cross_type == 'one_zebra':
             self.type = 'one_zebra'
             self.name = 'one zebra crossing'
@@ -44,12 +45,31 @@ class Zebra(object):
     def get_name(self):
         return self.name
 
-    def get_current_max_density(self):
+    def reload_config(self):
+        self.config.read_config_file()
+
+    def get_current_max_density(self,max_density):
+        self.max_density = float(self.config.get_config_file("max density setting",max_density))
         return self.max_density
 
-    def is_over_max(self,density,model_num):
-        if density > self.get_current_max_density()/model_num:
+    def set_current_max_density(self,max_density,new_value):
+        self.config.set_config_file("max density setting",max_density,new_value)
+
+    def get_max_type(self):
+        max_density = ''
+        if self.type == 'one_zebra':
+            max_density = "max_allowed_density_one_zebra"
+        elif self.type == 'tri_zebra':
+            max_density = "max_allowed_density_triangle_zebra"
+        elif self.type == 'rec_zebra':
+            max_density = "max_allowed_density_rectangle_zebra"
+        return max_density
+
+    def is_over_max(self,density):
+        if density > self.max_density:
             return True
         else:
             return False
+
+
 

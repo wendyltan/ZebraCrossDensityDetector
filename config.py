@@ -14,6 +14,9 @@ class Config(object):
         self.FONT = cv2.FONT_HERSHEY_SIMPLEX
         self.read_config_file()
 
+    def get_config_file(self,section,key):
+        return self.conf.get(section,key)
+
     def set_config_file(self,section,key,new_value):
         self.conf.set(section,key,new_value)
         self.write_config_file()

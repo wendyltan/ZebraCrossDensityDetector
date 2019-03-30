@@ -15,15 +15,14 @@ class Predictions(object):
     Class that deal with predict train_data saving and reading
     '''
 
-    def __init__(self,image_name,type):
+    def __init__(self,image_name,type,model_name):
         self.image_name = image_name
         self.result = self.init_prediction_result()
         self.flag = False
         self.type = type
-        self.save_path = PREDICT_RESULT_PATH+self.image_name+'_'+self.type+'.json'
+        self.model_name = model_name
+        self.save_path = PREDICT_RESULT_PATH+self.image_name+'_'+self.type+'_'+self.model_name+'.json'
 
-    def get_image_name(self):
-        return self.image_name
 
     def get_predict_flag(self):
         return self.flag
@@ -60,36 +59,37 @@ class Predictions(object):
         else:
             print('We don\' consider other type in this program')
 
-    def get_predict_result(self):
-        return self.result
 
-    def set_total_predict(self,total_prediction):
-        '''
-        Return the final result of predictions
-        :param image_name: image name
-        :param total_prediction:
-        :param prediction_result:
-        :return:
-        '''
-        total_prediction[self.image_name] = self.result
-        self.result = total_prediction
-        self.save_path = PREDICT_RESULT_PATH + self.type + '.json'
-        self.write_predict_result()
+    def write_total_predict(self,image_numbers):
 
-    def write_predict_result(self):
+        i=0
+        total_predict = {}
+        while i < image_numbers:
+
+            self.save_path =  PREDICT_RESULT_PATH+str(i+1)+'.jpg_'+self.type+'_'+self.model_name+'.json'
+            single_result = self.read_predict_result()
+            total_predict[str(i+1)+'.jpg'] = single_result
+            i+=1
+
+        self.result = total_predict
+        self.save_path = PREDICT_RESULT_PATH + self.type +'_'+ self.model_name+'.json'
+        self.write_predict_result('w')
+
+
+    def write_predict_result(self,mode):
         if not os.path.exists(PREDICT_RESULT_PATH):
             os.makedirs(PREDICT_RESULT_PATH)
 
         preObj = json.dumps(self.result)
 
-        fileObject = open(self.save_path, 'w')
+        fileObject = open(self.save_path, mode)
         fileObject.write(preObj)
         fileObject.close()
 
     def read_predict_result(self):
         with open(self.save_path, 'r') as f:
-            self.result = json.loads(f.read())
-        return self.result
+            result = json.loads(f.read())
+        return result
 
 
 

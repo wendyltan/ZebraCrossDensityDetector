@@ -15,8 +15,11 @@ class ProgramEntity(object):
     def get_zebra(self):
         return self.zebra
 
-    def get_current_mode(self):
-        return self.current_mode
+    def set_model_name(self,model_name):
+        self.model_name = model_name
+
+    def get_model_name(self):
+        return self.model_name
 
     def get_image_path(self):
         return self.image_path

@@ -8,15 +8,15 @@
 import json
 import os
 from config import Config as C
-from model import Weight
+from model import Weight, TimeIndicator
 import predictor as pd
 from model.ProgramEntity import ProgramEntity
 from model.Zebra import Zebra
 import draw_chart as dc
 
 C = C()
-
-def core_density(zebra_type,predictions,density):
+T = TimeIndicator.TimeIndicator()
+def core_density(zebra_type,predictions,tag):
 
     """
     Core caculation of density
@@ -26,32 +26,31 @@ def core_density(zebra_type,predictions,density):
     :return:
     """
 
-    if density == {}:
-        flag = True
-    else:
-        flag = False
-
-
+    density={}
     for image, result in predictions.items():
-        if flag:
-            density[image] = 0
         if result != {}:
+            density[image] = 0
             for type, number in result.items():
                 w = Weight.Weight(type).get_weight()
-                if type != 'bus' and type != 'car' and zebra_type == 'one_zebra':
-                    density[image] += w * number
-                elif type != 'bus' and type != 'car' and zebra_type != 'one_zebra':
-                    density[image] -= w * number
-                elif type == 'bus' or type == 'car' and zebra_type != 'one_zebra':
-                    density[image] += w * number
+                if T.if_gaofeng():
+                    # car first
+                    if tag == 'people' and type != 'bus' and type != 'car':
+                        density[image] -= w * number
+                    elif tag == 'cars' and (type == 'bus' or type == 'car'):
+                        density[image] += w * number
+                else:
+                    # people first
+                    if tag == 'people' and type != 'bus' and type != 'car':
+                        density[image] += w * number
+                    elif tag == 'cars' and (type == 'bus' or type == 'car'):
+                        density[image] -= w * number
 
     for image in density:
-        if zebra_type == 'tri_zebra' and flag == False:
+        if zebra_type == 'tri_zebra':
             density[image] *= 3
-        elif zebra_type == 'rec_zebra' and flag ==False:
+        elif zebra_type == 'rec_zebra':
             density[image] *= 4
-        else:
-            break
+        density[image] = round(density[image],2)
 
     return density
 
@@ -66,14 +65,22 @@ def single_model_caculation(zebra,predictions):
     density = {}
     zebra_type = zebra.get_type()
     if zebra.is_one_zebra():
-        density = core_density(zebra_type,predictions,density)
+        density = core_density(zebra_type,predictions,'people')
     elif not zebra.is_one_zebra():
         people = predictions['people']
         cars = predictions['cars']
-
         # caculate the cars density then substract the people density
-        people_density = core_density(zebra_type,people,density)
-        density = core_density(zebra_type, cars, people_density)
+        people_density = core_density(zebra_type,people,'people')
+        print('people density',people_density)
+        car_density = core_density(zebra_type, cars, 'cars')
+        print('car density',car_density)
+
+        for image,cal in people_density.items():
+            density[image] = 0
+            density[image] += cal
+        for image,cal in car_density.items():
+            density[image] += cal
+            density[image] = round(density[image],2)
 
     return density
 
@@ -87,18 +94,23 @@ def muti_model_caculation(zebra,predictions):
 
     muti_density = {}
     model_num = 0
+    flag = False
     for model, result in predictions.items():
         for image,result in single_model_caculation(zebra,result).items():
-            muti_density[image] = 0
+            if not flag:
+                muti_density[image] = 0
             muti_density[image] += result
+            print(image,result)
+        flag = True
+        print('=====')
         model_num +=1
 
     for image in muti_density:
         if muti_density[image] !=0:
             muti_density[image] /= model_num
-            muti_density[image]=round(muti_density[image],3)
+            muti_density[image]=round(muti_density[image],2)
 
-    return muti_density,model_num
+    return muti_density
 
 
 def get_caculations(predictions, pe):
@@ -117,17 +129,45 @@ def get_caculations(predictions, pe):
     if pe.is_current_model_single():
         result_set = single_model_caculation(zebra,predictions)
     elif not pe.is_current_model_single():
-        result_set,model_num = muti_model_caculation(zebra,predictions)
+        result_set = muti_model_caculation(zebra,predictions)
 
     print("Final result of density caculation: ",result_set)
 
-    dc.draw(result_set,zebra,model_num)
+    dc.draw(result_set,zebra)
 
     for image,density in result_set.items():
-        if zebra.is_over_max(density,model_num):
-            print(image,'density over max!too crowded around')
+        if zebra.is_over_max(density):
+            print(image,'density too big! current density is ',density,T.who_go_first())
 
     write_density(result_set)
+
+    # single image detect don't do the density adjust.
+    if not pe.get_image_path() != '':
+        adjust_max_density(zebra,result_set)
+
+
+def adjust_max_density(zebra,result_set):
+    sum = count = 0
+
+    for image,density in result_set.items():
+        sum += density
+        count +=1
+    # get average
+    sum /= count
+    max_density = zebra.get_max_type()
+    current_max = zebra.get_current_max_density(max_density)
+    new_current_max = 0
+
+    while True:
+        if not round(new_current_max,1) == current_max:
+            print('Do max_density adjust,new max at next start.')
+            zebra.reload_config()
+            current_max = zebra.get_current_max_density(max_density)
+            new_current_max = (current_max + sum) / 2
+            zebra.set_current_max_density(max_density,str(round(new_current_max,1)))
+        else:
+            print("Adjust current max_density:",str(round(new_current_max,1)))
+            break
 
 
 
@@ -162,8 +202,13 @@ def unpack_predict(result,pe):
             if image_path != '':
                 predictions[model] = prediction.read_predict_result()
             else:
-                for class_name, predict in prediction.items():
-                    pre[class_name] = predict.read_predict_result()
+                if zebra.is_one_zebra():
+                    pack1 = prediction.read_predict_result()
+                    for class_name, predict in pack1.items():
+                        pre[class_name] = predict
+                elif not zebra.is_one_zebra():
+                    for class_name, predict in prediction.items():
+                        pre[class_name] = predict.read_predict_result()
                 predictions[model] = pre
     elif pe.is_current_model_single():
         if zebra.is_one_zebra():
@@ -193,7 +238,7 @@ def write_density(result):
     fileObject.close()
 
 if __name__ == '__main__':
-    zebra = Zebra('one_zebra')
+    zebra = Zebra('rec_zebra')
     pe = ProgramEntity(zebra,'image','','single')
     print('Applying scene: ', zebra.get_name(), '.Using model:',pe.get_current_model())
     predictions = get_predictions(pe)

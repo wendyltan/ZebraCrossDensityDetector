@@ -217,6 +217,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
     def do_detect(self):
 
+
         zebra = Zebra(self.chooseZebraCombo.currentText())
         pe = ProgramEntity(zebra, self.mode, self.image_path, self.chooseModelCombo.currentText())
         print('Applying scene: ', zebra.get_name(), '.Using model:', pe.get_current_model())
@@ -227,6 +228,8 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
         file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
         self.webView.load(QUrl.fromLocalFile(file_path))
+
+
 
 
     def open_up_desktop_files(self,path):
@@ -244,15 +247,22 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             # only predict by one zebra when image is only single
             self.chooseZebraCombo.setCurrentIndex(0)
             self.image_path = self.imagePathLineEdit.text()
-            self.do_detect()
+            if not self.image_path == '':
+                self.do_detect()
 
-            # set image to the grahicalview
-            file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH+'/')
-            file_path = hp.load_file(C.DEFAULT_RESULT_PATH+'/'+file_name)
-            self.set_image_view(file_path)
+                # set image to the grahicalview
+                file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH+'/')
+                file_path = hp.load_file(C.DEFAULT_RESULT_PATH+'/'+file_name)
+                self.set_image_view(file_path)
+                self.statusBar().showMessage('open up result path success')
+                self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
+            else:
+                self.statusbar.showMessage('Choose image first')
 
         elif self.mode == 'image' and self.image_mode == 'directory':
             self.do_detect()
+            self.statusBar().showMessage('open up result path success')
+            self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
         elif self.mode == 'video':
 
             # change videoType as soon as possible
@@ -283,9 +293,8 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
                 self.video_source = 0
                 self.showFrame()
             self.do_detect()
-            self.statusBar().showMessage('detect and caculating...')
-        self.statusBar().showMessage('open up result path success')
-        self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
+            self.statusBar().showMessage('open up result path success')
+            self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
 
 
 
@@ -332,7 +341,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.singleImageCheckbox.setChecked(False)
             self.chooseImageBtn.setEnabled(False)
             self.image_mode = 'directory'
-            self.imagePathLineEdit.setText('search under my_dataset/')
+            self.imagePathLineEdit.setText('search under my_dataset/zebra_ as default.')
             self.statusBar().showMessage('image directory mode')
         elif self.image_mode == 'directory' and self.singleImageCheckbox.isChecked():
             self.imageDirCheckbox.setChecked(False)
