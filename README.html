@@ -12,34 +12,30 @@
 <p>To run my program,first you should check for the things below:
 - Make sure you have an GPU compatible for the training.
 - Make a directory under project root named weights/, download <strong>vgg16_reducedfc.pth</strong> base trainning network.
-- Make a directory under project root named <strong>my_dataset/</strong>.
 - Use <code>快速部署</code> to set up necessary data folders for detecting.
 - Download your VOC train dataset to data/, use shell script in data/script to help you do that.</p>
 <p>&nbsp;
 Also,make sure you have set up your environment as what <a href="https://github.com/amdegroot/ssd.pytorch">ssd.pytorch</a> project told you.</p>
 <p>&nbsp;
 If you finish all the above,then you are good to go.</p>
-<blockquote>
-<p>I can also write a shell script for these steps,maybe later..</p>
-</blockquote>
 <h3>Basic steps of the whole process</h3>
 <ol>
 <li>Run <code>train.py</code> to train network. feel free to adjust the parameters yourself cause I don't really know what's the best parameter either.</li>
 <li>Run <code>eval.py</code> to caculate the APs and mAP to see how precise can the network be.</li>
-<li>Run <code>gui.py</code> and choose your mode to calculate the density of image or video stream!</li>
+<li>Run <code>gui.py</code> and choose your mode to calculate the density of image or video stream.</li>
 </ol>
 <h2>Notification</h2>
 <ol>
-<li>Currently the image directory function will need you to put images under <code>my_dataset/zebra_people</code> and <code>my_dataset/zebra_cars</code>.Do it with <code>auto_prepare.py</code> !</li>
+<li>Currently the image directory function will need you to put images under <code>my_dataset/zebra_people</code> and <code>my_dataset/zebra_cars</code>.Do it with <code>快速部署</code> menu.</li>
 <li>Currently the video <code>camera</code> mode only support type <code>one_zebra</code>,which means it won't caculate the cars in the camera.This program is only a simulation of traffic camera ,so it is meaningless to let it compatible with detecting cars and people on camera at the same time.In a word,no car will be in the dorm or classroom while testing.It should have two cameras,one for people caculation and the other for cars on the road.Then combine them to do the final prediction,just like what <code>image directory</code> mode do.So the best way to use the program is to use mode <code>video_file</code>.</li>
-<li>Density caculation method is not yet scientific or reasonable enough.I will try to fix it later.</li>
 <li>Make sure the cars and people image have <strong>the same count</strong>.If not,it may have an effect on final result.</li>
 </ol>
+<h2>How is the whole process of my design</h2>
+<p>First the program <strong>do the detect</strong>.Then program <strong>do caculation of the detect</strong>,give user the density of each image,and according to whether is gaofeng or not,it decide whether people or cars can go first when the density <strong>exceed</strong> the max density.Finally,the max density will <strong>auto adjust</strong> to best fit current road condition under pre-specified mode.</p>
 <h2>TODO</h2>
 <p>The part I hope to complete in the near future
 - Still to come:
-  * [ ] Figure out the best wait to caulate density.
-  * [ ] Add more chart types for result display if needed.
+  * [x] Figure out the best wait to caulate density.
   * [ ] Do refactor to make codes more readable.
   * [x] Combine <code>auto_prepare.py</code> with user interface.
   * [x] 编写开题和中期检查表</p>

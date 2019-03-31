@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import json
 import os
-from config import Config as C
+from model.Config import Config as C
 from model import Weight, TimeIndicator
 import predictor as pd
 from model.ProgramEntity import ProgramEntity
@@ -122,7 +122,6 @@ def get_caculations(predictions, pe):
     """
 
     result_set = {}
-    model_num = 1
     zebra = pe.get_zebra()
 
 
@@ -138,6 +137,8 @@ def get_caculations(predictions, pe):
     for image,density in result_set.items():
         if zebra.is_over_max(density):
             print(image,'density too big! current density is ',density,T.who_go_first())
+        else:
+            print(image,'current density is ',density,T.who_wait())
 
     write_density(result_set)
 
@@ -238,8 +239,8 @@ def write_density(result):
     fileObject.close()
 
 if __name__ == '__main__':
-    zebra = Zebra('rec_zebra')
-    pe = ProgramEntity(zebra,'image','','single')
+    zebra = Zebra('one_zebra')
+    pe = ProgramEntity(zebra,'image',r'','single')
     print('Applying scene: ', zebra.get_name(), '.Using model:',pe.get_current_model())
     predictions = get_predictions(pe)
     get_caculations(predictions, pe)

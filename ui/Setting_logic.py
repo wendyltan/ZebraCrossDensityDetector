@@ -9,7 +9,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QWidget
 
 from ui.SettingDialog import Ui_Dialog
-from config import Config as C
+from model.Config import Config as C
 class SettingDialog(QtWidgets.QDialog,Ui_Dialog):
     def __init__(self):
         super(SettingDialog,self).__init__()

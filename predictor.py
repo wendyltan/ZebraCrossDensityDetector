@@ -13,7 +13,7 @@ from model.Predictions import Predictions
 from utils import helper as hp
 from train_data import BaseTransform, VOC_CLASSES as labelmap
 from traning.ssd import build_ssd
-from config import Config as C
+from model.Config import Config as C
 
 C = C()
 
@@ -72,6 +72,7 @@ def get_predicts(pe):
 
     if zebra.is_one_zebra():
         dir = pe.get_image_source_path(tag[0])
+
         total = core_predict(dir,tag[0],pe)
     elif not zebra.is_one_zebra():
         # considering the influence of car of the crowd
@@ -173,7 +174,10 @@ def core_predict(directory,tag,pe):
         if not predict.get_predict_flag():
             failed_count += 1
 
-    predict.write_total_predict(image_numbers)
+    if image_path != '':
+        predict.write_total_predict(os.path.basename(image_path))
+    else:
+        predict.write_total_predict(image_numbers)
     print('-' * 100)
     print(failed_count, 'of the images detect failed,total ', image_numbers, ' of images for dataset ',directory)
     print('-' * 100)

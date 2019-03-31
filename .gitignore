@@ -103,7 +103,7 @@ venv.bak/
 .mypy_cache/
 /checkpoints/
 /ssd300_120000/
-/weights/
+/traning/weights/
 /my_dataset/
 /train_data/VOCdevkit/
 /.idea/

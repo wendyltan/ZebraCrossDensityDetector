@@ -8,7 +8,7 @@
 
 import plotly.graph_objs as go
 import plotly.offline as off
-from config import Config as C
+from model.Config import Config as C
 from utils import helper as hp
 
 C = C()
@@ -53,7 +53,7 @@ def draw_line_with_markers(list_x,list_y,name):
 
 def draw_line_plot(list_x,list_y,max_list,title,save_dir):
 
-    trace1 = draw_line(list_x,list_y,'result_density')
+    trace1 = draw_line_with_markers(list_x,list_y,'result_density')
     trace2 = draw_line_with_markers(list_x,max_list,'max_density')
     data = [trace1,trace2]
     off.plot(data,filename=save_dir+title+'.html',auto_open=False)

@@ -39,6 +39,12 @@ class TimeIndicator(object):
         else:
            return 'Not gaofeng,people go first.'
 
+    def who_wait(self):
+        if self.gaofeng:
+            return 'cars wait.'
+        else:
+            return  'people wait.'
+
     def get_day_or_night(self):
         current_hour = self.localtime().tm_hour
         if current_hour <= 12:

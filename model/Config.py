@@ -3,7 +3,7 @@
 # @Time    : 2019/3/13 10:40
 # @Author  : wendy
 # @Usage   : Set some global config here
-# @File    : config.py
+# @File    : Config.py
 # @Software: PyCharm
 import cv2
 import configparser

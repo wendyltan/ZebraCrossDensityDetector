@@ -7,7 +7,7 @@
 # @Software: PyCharm
 
 # suit yourself to define the max
-from config import Config as C
+from model.Config import Config as C
 config = C()
 MAX_ALLOWED_DENSITY_ONE_ZEBRA = float(config.MAX_ALLOWED_DENSITY_ONE_ZEBRA)
 MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA = float(config.MAX_ALLOWED_DENSITY_TRIANGLE_ZEBRA)

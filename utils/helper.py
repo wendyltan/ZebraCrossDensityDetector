@@ -10,7 +10,7 @@ import os
 import cv2
 from PIL import Image
 import shutil
-from config import Config as C
+from model.Config import Config as C
 C = C()
 def pull_image(directory,index):
 

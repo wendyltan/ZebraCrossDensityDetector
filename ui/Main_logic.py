@@ -7,8 +7,9 @@
 # @Software: PyCharm
 
 import sys
+
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtCore import QUrl, Qt, QThread, pyqtSignal, QTimer, QDateTime
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import QGraphicsScene
 
@@ -19,7 +20,7 @@ from utils import helper as hp
 from model.Zebra import Zebra
 from ui.MainWindow import Ui_MainWindow
 from ui.About_logic import AboutDialog
-from config import Config as C
+from model.Config import Config as C
 from ui.Setting_logic import SettingDialog
 from PyQt5 import QtCore,QtGui
 from PyQt5.QtWebEngineWidgets import *
@@ -28,9 +29,8 @@ import cv2
 C = C()
 
 
-
-class EmittingStream(QtCore.QObject):
-    textWritten = QtCore.pyqtSignal(str)
+class EmittingStream(QThread):
+    textWritten = pyqtSignal(str)
 
     def write(self, text):
         self.textWritten.emit(str(text))
@@ -80,12 +80,41 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
         self.frame_num = 0
 
+        self.timeLabel.setStyleSheet("QLabel{background:white;}"
+                                 "QLabel{color:rgb(300,300,300,120);font-size:12px;font-weight:bold;font-family:宋体;}")
+
+        timer = QTimer(self)
+        timer.timeout.connect(self.showtime)
+        timer.start()
+
+
 
         sys.stdout = EmittingStream(textWritten=self.normalOutputWritten)
         sys.stderr = EmittingStream(textWritten=self.normalOutputWritten)
 
 
+    def showtime(self):
+        datetime = QDateTime.currentDateTime()
+        text = datetime.toString()
+        self.timeLabel.setText(text)
 
+    def select_videoType(self):
+        type = self.chooseVideoType.currentText()
+        C.set_config_file("global setting", "default_video_source", type)
+
+    def single_image(self):
+        file_name, _ = QtWidgets.QFileDialog.getOpenFileName(self, '打开图片', r'my_dataset/',
+                                                             'Image Files(*.jpg *.jpeg *.png)')
+        self.imagePathLineEdit.setText(file_name)
+        self.set_image_view(file_name)
+
+    def set_image_view(self, file_name):
+        img = QImage()
+        img.load(file_name)
+        img = img.scaled(self.graphicsView.width(), self.graphicsView.height())
+        scene = QGraphicsScene()
+        scene.addPixmap(QPixmap().fromImage(img))
+        self.graphicsView.setScene(scene)
 
     def showFrame(self):
         self.cap = cv2.VideoCapture(self.video_source)
@@ -170,25 +199,80 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         scene.addPixmap(QPixmap().fromImage(img))
         self.graphicsView.setScene(scene)
 
+    def do_detect(self):
 
-    def select_videoType(self):
-        type = self.chooseVideoType.currentText()
-        C.set_config_file("global setting","default_video_source",type)
+        zebra = Zebra(self.chooseZebraCombo.currentText())
+        pe = ProgramEntity(zebra, self.mode, self.image_path, self.chooseModelCombo.currentText())
+        print('Applying scene: ', zebra.get_name(), '.Using model:', pe.get_current_model())
+        predictions = dcl.get_predictions(pe)
+        dcl.get_caculations(predictions, pe)
 
+        self.statusBar().showMessage('showing result html chart...')
+        latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
+        file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
+        self.webView.load(QUrl.fromLocalFile(file_path))
 
-    def single_image(self):
+    def open_up_desktop_files(self, path):
 
-        file_name,_ = QtWidgets.QFileDialog.getOpenFileName(self,'打开图片',r'my_dataset/', 'Image Files(*.jpg *.jpeg *.png)')
-        self.imagePathLineEdit.setText(file_name)
-        self.set_image_view(file_name)
+        desktopService = QDesktopServices()
+        path_url = hp.load_file(path).replace('/', '\\').replace('\\', '\\\\')
+        desktopService.openUrl(QUrl('file:///' + path_url))
 
-    def set_image_view(self,file_name):
-        img = QImage()
-        img.load(file_name)
-        img = img.scaled(self.graphicsView.width(), self.graphicsView.height())
-        scene = QGraphicsScene()
-        scene.addPixmap(QPixmap().fromImage(img))
-        self.graphicsView.setScene(scene)
+    def start_detect(self):
+
+        self.image_path = ''
+        self.statusBrowser.clear()
+
+        if self.mode == 'image' and self.image_mode == 'single':
+            # only predict by one zebra when image is only single
+            self.chooseZebraCombo.setCurrentIndex(0)
+            self.image_path = self.imagePathLineEdit.text()
+            if not self.image_path == '':
+                self.do_detect()
+
+                # set image to the grahicalview
+                file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH + '/')
+                file_path = hp.load_file(C.DEFAULT_RESULT_PATH + '/' + file_name)
+                self.set_image_view(file_path)
+                self.statusBar().showMessage('single image predict success')
+            else:
+                self.statusbar.showMessage('Choose image first')
+
+        elif self.mode == 'image' and self.image_mode == 'directory':
+            self.do_detect()
+            self.statusBar().showMessage('open up result path success')
+            self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
+        elif self.mode == 'video':
+
+            # change videoType as soon as possible
+            self.select_videoType()
+            C.read_config_file()
+
+            if self.chooseVideoType.currentText() == 'video_file':
+                base_path = C.DEFAULT_VIDEO_PATH
+
+                if self.chooseZebraCombo.currentText() == 'one_zebra':
+                    self.tag = 'people'
+                    self.video_source = base_path + self.tag + '.mp4'
+                    self.showFrame()
+                elif self.chooseZebraCombo.currentText() == 'tri_zebra' or \
+                        self.chooseZebraCombo.currentText() == 'rec_zebra':
+                    print('Read people video first...')
+                    self.tag = 'people'
+                    self.video_source = base_path + self.tag + '.mp4'
+                    self.showFrame()
+                    print('Read cars video then...')
+                    self.tag = 'cars'
+                    self.video_source = base_path + self.tag + '.mp4'
+                    self.showFrame()
+            elif self.chooseVideoType.currentText() == 'camera':
+                # only support one zebra for now
+                self.tag = 'people'
+                self.video_source = 0
+                self.showFrame()
+            self.do_detect()
+            self.statusBar().showMessage('open up result path success')
+            self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
 
     def setting(self):
         setting_dialog = SettingDialog()
@@ -215,86 +299,6 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         prepare_dialog.show()
         prepare_dialog.exec_()
 
-    def do_detect(self):
-
-
-        zebra = Zebra(self.chooseZebraCombo.currentText())
-        pe = ProgramEntity(zebra, self.mode, self.image_path, self.chooseModelCombo.currentText())
-        print('Applying scene: ', zebra.get_name(), '.Using model:', pe.get_current_model())
-        predictions = dcl.get_predictions(pe)
-        dcl.get_caculations(predictions, pe)
-
-        self.statusBar().showMessage('showing result html chart...')
-        latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
-        file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
-        self.webView.load(QUrl.fromLocalFile(file_path))
-
-
-
-
-    def open_up_desktop_files(self,path):
-
-        desktopService = QDesktopServices()
-        path_url = hp.load_file(path).replace('/','\\').replace('\\','\\\\')
-        desktopService.openUrl(QUrl('file:///'+path_url))
-
-    def start_detect(self):
-
-        self.image_path = ''
-        self.statusBrowser.clear()
-
-        if self.mode == 'image' and self.image_mode == 'single':
-            # only predict by one zebra when image is only single
-            self.chooseZebraCombo.setCurrentIndex(0)
-            self.image_path = self.imagePathLineEdit.text()
-            if not self.image_path == '':
-                self.do_detect()
-
-                # set image to the grahicalview
-                file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH+'/')
-                file_path = hp.load_file(C.DEFAULT_RESULT_PATH+'/'+file_name)
-                self.set_image_view(file_path)
-                self.statusBar().showMessage('open up result path success')
-                self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
-            else:
-                self.statusbar.showMessage('Choose image first')
-
-        elif self.mode == 'image' and self.image_mode == 'directory':
-            self.do_detect()
-            self.statusBar().showMessage('open up result path success')
-            self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
-        elif self.mode == 'video':
-
-            # change videoType as soon as possible
-            self.select_videoType()
-            C.read_config_file()
-            self.open_up_desktop_files(C.DEFAULT_VIDEO_PATH)
-
-            if self.chooseVideoType.currentText() == 'video_file':
-                base_path = C.DEFAULT_VIDEO_PATH
-
-                if self.chooseZebraCombo.currentText() == 'one_zebra':
-                    self.tag = 'people'
-                    self.video_source = base_path+self.tag+'.mp4'
-                    self.showFrame()
-                elif self.chooseZebraCombo.currentText() == 'tri_zebra' or\
-                    self.chooseZebraCombo.currentText() == 'rec_zebra':
-                    print('Read people video first...')
-                    self.tag = 'people'
-                    self.video_source = base_path + self.tag + '.mp4'
-                    self.showFrame()
-                    print('Read cars video then...')
-                    self.tag = 'cars'
-                    self.video_source = base_path + self.tag + '.mp4'
-                    self.showFrame()
-            elif self.chooseVideoType.currentText() == 'camera':
-                # only support one zebra for now
-                self.tag = 'people'
-                self.video_source = 0
-                self.showFrame()
-            self.do_detect()
-            self.statusBar().showMessage('open up result path success')
-            self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
 
 
 
@@ -308,12 +312,14 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
 
+
     def normalOutputWritten(self, text):
         cursor = self.statusBrowser.textCursor()
         cursor.movePosition(QtGui.QTextCursor.End)
         cursor.insertText(text)
         self.statusBrowser.setTextCursor(cursor)
         self.statusBrowser.ensureCursorVisible()
+
 
     def get_image_checked(self):
         if self.action_image_mode.isChecked():

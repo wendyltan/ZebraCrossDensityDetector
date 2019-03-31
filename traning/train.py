@@ -1,6 +1,6 @@
 from train_data import *
-from utils.augmentations import SSDAugmentation
-from layers.modules import MultiBoxLoss
+from traning.util.augmentations import SSDAugmentation
+from traning.layers import MultiBoxLoss
 from traning.ssd import build_ssd
 import os
 import time
@@ -45,9 +45,9 @@ parser.add_argument('--weight_decay', default=5e-4, type=float,
                     help='Weight decay for SGD')
 parser.add_argument('--gamma', default=0.1, type=float,
                     help='Gamma update for SGD')
-parser.add_argument('--visdom', default=True, type=str2bool,
+parser.add_argument('--visdom', default=False, type=str2bool,
                     help='Use visdom for loss visualization')
-parser.add_argument('--save_folder', default='checkpoints', # lxx change 'weights/' to 'checkpoints'
+parser.add_argument('--save_folder', default='..\checkpoints',
                     help='Directory for saving checkpoint models')
 args = parser.parse_args()
 

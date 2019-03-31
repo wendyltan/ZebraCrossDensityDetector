@@ -5,7 +5,7 @@
 # @Usage   : Weight object for weight info storing and caculating later
 # @File    : Weight.py
 # @Software: PyCharm
-from config import Config as C
+from model.Config import Config as C
 TYPE = ['person','motorbike','bicycle','dog','cat','car','bus']
 config = C()
 PERSON_WEIGHT = float(config.PERSON_WEIGHT)

@@ -7,7 +7,7 @@
 # @Software: PyCharm
 import os
 import json
-from config import Config as C
+from model.Config import Config as C
 PREDICT_RESULT_PATH = C().PREDICT_RESULT_PATH
 
 class Predictions(object):
@@ -60,16 +60,20 @@ class Predictions(object):
             print('We don\' consider other type in this program')
 
 
-    def write_total_predict(self,image_numbers):
+    def write_total_predict(self,image_numbers_or_name):
 
         i=0
         total_predict = {}
-        while i < image_numbers:
+        if type(image_numbers_or_name) == str:
+            self.save_path = PREDICT_RESULT_PATH + image_numbers_or_name+'_' + self.type + '_' + self.model_name + '.json'
+            total_predict[image_numbers_or_name] = self.read_predict_result()
+        else:
+            while i < image_numbers_or_name:
 
-            self.save_path =  PREDICT_RESULT_PATH+str(i+1)+'.jpg_'+self.type+'_'+self.model_name+'.json'
-            single_result = self.read_predict_result()
-            total_predict[str(i+1)+'.jpg'] = single_result
-            i+=1
+                self.save_path =  PREDICT_RESULT_PATH+str(i+1)+'.jpg_'+self.type+'_'+self.model_name+'.json'
+                single_result = self.read_predict_result()
+                total_predict[str(i+1)+'.jpg'] = single_result
+                i+=1
 
         self.result = total_predict
         self.save_path = PREDICT_RESULT_PATH + self.type +'_'+ self.model_name+'.json'
