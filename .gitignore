@@ -109,3 +109,4 @@ venv.bak/
 /.idea/
 /predict_image/
 /predict_text/
+progress_write.txt

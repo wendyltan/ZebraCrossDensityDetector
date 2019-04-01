@@ -7,9 +7,10 @@
 # @Software: PyCharm
 
 import sys
+import time
 
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QUrl, Qt, QThread, pyqtSignal, QTimer, QDateTime
+from PyQt5.QtCore import QUrl, Qt, QThread, pyqtSignal, QTimer, QDateTime, QBasicTimer
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QDesktopServices
 from PyQt5.QtWidgets import QGraphicsScene
 
@@ -28,6 +29,32 @@ import cv2
 # init the config object
 C = C()
 
+class DetectThread(QThread):
+    trigger = pyqtSignal()
+    progress_update = pyqtSignal(int)
+    def __init__(self,zebraComboText,mode,image_path,modelComboText):
+        super(DetectThread, self).__init__()
+        self.zebra_combo = zebraComboText
+        self.mode = mode
+        self.image_path = image_path
+        self.model_combo = modelComboText
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+
+        zebra = Zebra(self.zebra_combo)
+        pe = ProgramEntity(zebra, self.mode, self.image_path, self.model_combo)
+        print('Applying scene: ', zebra.get_name(), '.Using model:', pe.get_current_model())
+
+        dcl.start_caculate(pe)
+        while not dcl.finish:
+            self.progress_update.emit(dcl.val)
+
+        self.progress_update.emit(100)
+        self.trigger.emit()
+
 
 class EmittingStream(QThread):
     textWritten = pyqtSignal(str)
@@ -42,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
     def __init__(self):
         super(MainWindow,self).__init__()
         self.setupUi(self)
-        self.setFixedSize(1121, 722)
+        self.setFixedSize(1123, 751)
 
         self.webView = QWebEngineView(self.resultArea)
         self.webView.setGeometry(QtCore.QRect(20, 30, 461, 271))
@@ -80,17 +107,16 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
         self.frame_num = 0
 
-        self.timeLabel.setStyleSheet("QLabel{background:white;}"
-                                 "QLabel{color:rgb(300,300,300,120);font-size:12px;font-weight:bold;font-family:宋体;}")
+        self.timeLabel.setStyleSheet("QLabel{color:rgb(300,300,300,120);font-size:12px;font-weight:bold;font-family:宋体;}")
 
         timer = QTimer(self)
         timer.timeout.connect(self.showtime)
         timer.start()
 
 
-
         sys.stdout = EmittingStream(textWritten=self.normalOutputWritten)
         sys.stderr = EmittingStream(textWritten=self.normalOutputWritten)
+
 
 
     def showtime(self):
@@ -157,7 +183,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
                 print('Saving frame', counter)
                 cv2.imwrite(self.result_path + '/' + str(i) + '.jpg', frame)  # save the frame picture
             counter += 1
-            cv2.waitKey(1)
+            cv2.waitKey(1) & 0xFF
             if i == self.frame_num and self.frame_num !=0:
                 break
 
@@ -174,7 +200,6 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         while True:
             ret, frame = self.cap.read()
             self.showImage(frame)
-            # what is this magical statement?
             cv2.waitKey(1) & 0xFF
             # save image every 150 frame on my computer / 5 seconds
             if (counter % timeF) == 0:
@@ -187,6 +212,18 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             counter += 1
 
         self.cap.release()
+
+    def updateProgressBar(self, maxVal):
+        self.progressBar.setValue(maxVal)
+
+
+
+    def timeStop(self):
+        self.statusBar().showMessage('showing result html chart...')
+        latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
+        file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
+        self.webView.load(QUrl.fromLocalFile(file_path))
+
 
 
     def showImage(self,src_img):
@@ -201,16 +238,13 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
     def do_detect(self):
 
-        zebra = Zebra(self.chooseZebraCombo.currentText())
-        pe = ProgramEntity(zebra, self.mode, self.image_path, self.chooseModelCombo.currentText())
-        print('Applying scene: ', zebra.get_name(), '.Using model:', pe.get_current_model())
-        predictions = dcl.get_predictions(pe)
-        dcl.get_caculations(predictions, pe)
-
-        self.statusBar().showMessage('showing result html chart...')
-        latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
-        file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
-        self.webView.load(QUrl.fromLocalFile(file_path))
+        self.thread = DetectThread(self.chooseZebraCombo.currentText(),
+                                   self.mode,
+                                   self.image_path,
+                                   self.chooseModelCombo.currentText())
+        self.thread.start()
+        self.thread.trigger.connect(self.timeStop)
+        self.thread.progress_update.connect(self.updateProgressBar)
 
     def open_up_desktop_files(self, path):
 
@@ -218,19 +252,20 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         path_url = hp.load_file(path).replace('/', '\\').replace('\\', '\\\\')
         desktopService.openUrl(QUrl('file:///' + path_url))
 
+
     def start_detect(self):
 
         self.image_path = ''
         self.statusBrowser.clear()
+        self.progressBar.reset()
 
         if self.mode == 'image' and self.image_mode == 'single':
             # only predict by one zebra when image is only single
             self.chooseZebraCombo.setCurrentIndex(0)
             self.image_path = self.imagePathLineEdit.text()
             if not self.image_path == '':
-                self.do_detect()
-
                 # set image to the grahicalview
+                self.do_detect()
                 file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH + '/')
                 file_path = hp.load_file(C.DEFAULT_RESULT_PATH + '/' + file_name)
                 self.set_image_view(file_path)
@@ -274,6 +309,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.statusBar().showMessage('open up result path success')
             self.open_up_desktop_files(C.DEFAULT_RESULT_PATH)
 
+
     def setting(self):
         setting_dialog = SettingDialog()
         setting_dialog.setWindowIcon(self.windowIcon())
@@ -306,6 +342,9 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.chooseModelCombo.setCurrentIndex(0)
         self.chooseZebraCombo.setCurrentIndex(0)
         self.chooseVideoType.setCurrentIndex(0)
+        self.statusBrowser.clear()
+        self.imagePathLineEdit.clear()
+        self.graphicsView.setScene(None)
 
 
     def __del__(self):

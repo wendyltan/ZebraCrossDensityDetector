@@ -7,15 +7,65 @@
 # @Software: PyCharm
 import json
 import os
+
 from model.Config import Config as C
 from model import Weight, TimeIndicator
 import predictor as pd
-from model.ProgramEntity import ProgramEntity
-from model.Zebra import Zebra
 import draw_chart as dc
+import threading
 
 C = C()
 T = TimeIndicator.TimeIndicator()
+finish = False
+val = 0
+mutex = threading.Lock()
+
+class DensityThread (threading.Thread):
+    def __init__(self, pe,threadId):
+        threading.Thread.__init__(self)
+        self.pe = pe
+        self.threadId = threadId
+        self.init_file()
+
+    def init_file(self):
+        mutex.acquire(10)
+        self.f = open('progress_write.txt', 'w')
+        self.f.writelines(str(0) + '\n')
+        self.f.close()
+        mutex.release()
+
+    def run(self):
+        global finish
+        if self.threadId == 1:
+            self.write_progress()
+        elif self.threadId == 2:
+            predictions = get_predictions(self.pe)
+            get_caculations(predictions, self.pe)
+            finish = True
+        elif self.threadId == 3:
+            self.read_progress()
+
+    def write_progress(self):
+        i = 0.01
+        while finish != True:
+            mutex.acquire(10)
+            f = open('progress_write.txt', 'w')
+            f.writelines(str(i) + '\n')
+            i += 0.01
+            f.close()
+            mutex.release()
+
+    def read_progress(self):
+        global val
+        while finish != True:
+            mutex.acquire(10)
+            f = open('progress_write.txt', 'r')
+            lines = f.readlines()  # 读取所有行
+            last_line = lines[0].strip('\n')  # 取最后一行
+            val = int(float(last_line))
+            f.close()
+            mutex.release()
+
 def core_density(zebra_type,predictions,tag):
 
     """
@@ -171,7 +221,6 @@ def adjust_max_density(zebra,result_set):
             break
 
 
-
 def get_predictions(pe):
     """
     Get prediction result from predictor module
@@ -238,9 +287,17 @@ def write_density(result):
     fileObject.write(preObj)
     fileObject.close()
 
-if __name__ == '__main__':
-    zebra = Zebra('one_zebra')
-    pe = ProgramEntity(zebra,'image',r'','single')
-    print('Applying scene: ', zebra.get_name(), '.Using model:',pe.get_current_model())
-    predictions = get_predictions(pe)
-    get_caculations(predictions, pe)
+def start_caculate(pe):
+    writeThread = DensityThread(pe,1)
+    workThread = DensityThread(pe,2)
+    readThread = DensityThread(pe,3)
+    writeThread.start()
+    workThread.start()
+    readThread.start()
+
+# if __name__ == '__main__':
+#     zebra = Zebra('one_zebra')
+#     pe = ProgramEntity(zebra,'image',r'','single')
+#     print('Applying scene: ', zebra.get_name(), '.Using model:',pe.get_current_model())
+#     predictions = get_predictions(pe)
+#     get_caculations(predictions, pe)
