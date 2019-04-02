@@ -50,7 +50,7 @@ The part I hope to complete in the near future
   * [x] Do refactor to make codes more readable.
   * [x] Combine `auto_prepare.py` with user interface.
   * [x] 编写开题和中期检查表
-  * [x] 完善README
-  * [x] 编写最终的论文
+  * [ ] 完善README
+  * [ ] 编写最终的论文
 
 
