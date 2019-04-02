@@ -17,7 +17,7 @@ Also,make sure you have set up your environment as what [ssd.pytorch](https://gi
 If you finish all the above,then you are good to go.
 
 
-### Basic steps of the whole process
+## Basic steps of the whole process
 1. Run `train.py` to train network. feel free to adjust the parameters yourself cause I don't really know what's the best parameter either.
 2. Run `eval.py` to caculate the APs and mAP to see how precise can the network be.
 3. Run `gui.py` and choose your mode to calculate the density of image or video stream.
@@ -28,14 +28,23 @@ If you finish all the above,then you are good to go.
 3. Make sure the cars and people image have **the same count**.If not,it may have an effect on final result.
 
 ## How is the whole process of my design
-First the program **do the detect**.Then program **do caculation of the detect**,give user the density of each image,and according to whether is gaofeng or not,it decide whether people or cars can go first when the density **exceed** the max density.Finally,the max density will **auto adjust** to best fit current road condition under pre-specified mode.
+1.First the program **do the detect**.
+2.Then program **do caculation of the detect**,give user the density of each image.
+3.And according to whether is gaofeng or not,it decide whether people or cars can go first when the density **exceed** the max density.
+4.Finally,the max density will **auto adjust** to best fit current road condition under pre-specified mode.
+
+
+## New features compared to last push!
+`多线程显示界面去卡顿` ，`进度条（模拟）显示运行时长`
 
 ## TODO
 The part I hope to complete in the near future
 - Still to come:
   * [x] Figure out the best wait to caulate density.
-  * [ ] Do refactor to make codes more readable.
+  * [x] Do refactor to make codes more readable.
   * [x] Combine `auto_prepare.py` with user interface.
   * [x] 编写开题和中期检查表
+  * [x] 完善README
+  * [x] 编写最终的论文
 
 

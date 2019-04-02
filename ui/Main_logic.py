@@ -7,7 +7,6 @@
 # @Software: PyCharm
 
 import sys
-import time
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QUrl, Qt, QThread, pyqtSignal, QTimer, QDateTime, QBasicTimer
@@ -30,6 +29,11 @@ import cv2
 C = C()
 
 class DetectThread(QThread):
+    """
+    Use this thread to do the main detect job out of main thread
+    """
+
+    #define two signal to active in MainWindow
     trigger = pyqtSignal()
     progress_update = pyqtSignal(int)
     def __init__(self,zebraComboText,mode,image_path,modelComboText):
@@ -44,6 +48,9 @@ class DetectThread(QThread):
 
     def run(self):
 
+        #change to false before do detect and caculate,if not ,it will not work
+        dcl.finish = False
+
         zebra = Zebra(self.zebra_combo)
         pe = ProgramEntity(zebra, self.mode, self.image_path, self.model_combo)
         print('Applying scene: ', zebra.get_name(), '.Using model:', pe.get_current_model())
@@ -56,7 +63,11 @@ class DetectThread(QThread):
         self.trigger.emit()
 
 
-class EmittingStream(QThread):
+class PrintLog(QThread):
+
+    """
+    Use this class to print log on statusBrowser
+    """
     textWritten = pyqtSignal(str)
 
     def write(self, text):
@@ -65,12 +76,17 @@ class EmittingStream(QThread):
 
 class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
+    """
+    Main window logic
+    """
+
 
     def __init__(self):
         super(MainWindow,self).__init__()
         self.setupUi(self)
         self.setFixedSize(1123, 751)
 
+        # ---------------web view config------------------------------ #
         self.webView = QWebEngineView(self.resultArea)
         self.webView.setGeometry(QtCore.QRect(20, 30, 461, 271))
         self.webView.setObjectName("webView")
@@ -79,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.setWindowIcon(QIcon(C.ICON_PATH))
         self.statusBrowser.setReadOnly(True)
 
-
+        # ---------------menu and widget slot configs------------------------------ #
         self.actionabout.triggered.connect(self.about)
         self.actioncommon_setting.triggered.connect(self.setting)
         self.actionauto_prepare.triggered.connect(self.auto_prepare)
@@ -104,37 +120,73 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.action_image_mode.triggered.connect(self.get_image_checked)
         self.action_video_mode.triggered.connect(self.get_video_checked)
 
-
+        # ---------------video file frame config------------------------------ #
         self.frame_num = 0
 
+        # ---------------time label config------------------------------ #
         self.timeLabel.setStyleSheet("QLabel{color:rgb(300,300,300,120);font-size:12px;font-weight:bold;font-family:宋体;}")
-
         timer = QTimer(self)
         timer.timeout.connect(self.showtime)
         timer.start()
 
-
-        sys.stdout = EmittingStream(textWritten=self.normalOutputWritten)
-        sys.stderr = EmittingStream(textWritten=self.normalOutputWritten)
+        # ---------------print log config------------------------------ #
+        sys.stdout = PrintLog()
+        sys.stdout.textWritten.connect(self.normalOutputWritten)
+        sys.stderr = PrintLog()
+        sys.stderr.textWritten.connect(self.normalOutputWritten)
 
 
 
     def showtime(self):
+        """
+        Show time on time label
+        :return:
+        """
         datetime = QDateTime.currentDateTime()
         text = datetime.toString()
         self.timeLabel.setText(text)
 
-    def select_videoType(self):
-        type = self.chooseVideoType.currentText()
-        C.set_config_file("global setting", "default_video_source", type)
+    def updateProgressBar(self, maxVal):
+        """
+        Update progressbar by child thread
+        :param maxVal:
+        :return:
+        """
+        self.progressBar.setValue(maxVal)
+
+    def detectEnd(self):
+        """
+        After each detect ,show html chart and maybe load result image if single image mode
+        :return:
+        """
+        self.statusBar().showMessage('showing result html chart...')
+        latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
+        file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
+        self.webView.load(QUrl.fromLocalFile(file_path))
+        if self.image_path != '':
+            file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH + '/')
+            file_path = hp.load_file(C.DEFAULT_RESULT_PATH + '/' + file_name)
+            print(file_path)
+            self.set_image_view(file_path)
+
+
 
     def single_image(self):
+        """
+        Open one single image
+        :return:
+        """
         file_name, _ = QtWidgets.QFileDialog.getOpenFileName(self, '打开图片', r'my_dataset/',
                                                              'Image Files(*.jpg *.jpeg *.png)')
         self.imagePathLineEdit.setText(file_name)
         self.set_image_view(file_name)
 
     def set_image_view(self, file_name):
+        """
+        Set image to graphical view
+        :param file_name:
+        :return:
+        """
         img = QImage()
         img.load(file_name)
         img = img.scaled(self.graphicsView.width(), self.graphicsView.height())
@@ -143,6 +195,10 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.graphicsView.setScene(scene)
 
     def showFrame(self):
+        """
+        Show video file or camera on graphical view
+        :return:
+        """
         self.cap = cv2.VideoCapture(self.video_source)
         if self.cap.isOpened():
             self.judge_mode(C.DEFAULT_VIDEO_SOURCE)
@@ -150,6 +206,12 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.cap.release()
 
     def judge_mode(self, from_which=''):
+        """
+        Do the right action depend on the image or video type.
+        Set the right folder path
+        :param from_which:
+        :return:
+        """
         self.result_path = ''
         if self.mode == 'image':
             base_dir = 'my_dataset/zebra_'
@@ -166,6 +228,10 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
 
     def readVideo(self):
+        """
+        Read video file
+        :return:
+        """
 
         ret = self.cap.read()
         fps = self.cap.get(cv2.CAP_PROP_FPS)
@@ -192,6 +258,11 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.cap.release()
 
     def imageCapture(self):
+
+        """
+        Open camera and capture images
+        :return:
+        """
         image_Count = 1
         fps = self.cap.get(cv2.CAP_PROP_FPS)
         timeF = fps * 5
@@ -213,20 +284,14 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
         self.cap.release()
 
-    def updateProgressBar(self, maxVal):
-        self.progressBar.setValue(maxVal)
-
-
-
-    def timeStop(self):
-        self.statusBar().showMessage('showing result html chart...')
-        latest_file_name = hp.get_latest_file(C.PREDICT_RESULT_IMAGE)
-        file_path = hp.load_file((C.PREDICT_RESULT_IMAGE + latest_file_name).replace('/', '\\'))
-        self.webView.load(QUrl.fromLocalFile(file_path))
-
 
 
     def showImage(self,src_img):
+        """
+        Show image on graphical view
+        :param src_img:
+        :return:
+        """
         src_img = cv2.cvtColor(src_img,cv2.COLOR_BGR2RGB)
         height,width,bytesPerComponent = src_img.shape
         bytesPerLine = bytesPerComponent * width
@@ -238,15 +303,25 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
     def do_detect(self):
 
+        """
+        Open up new thread to do the detect job.
+        :return:
+        """
+
         self.thread = DetectThread(self.chooseZebraCombo.currentText(),
                                    self.mode,
                                    self.image_path,
                                    self.chooseModelCombo.currentText())
         self.thread.start()
-        self.thread.trigger.connect(self.timeStop)
+        self.thread.trigger.connect(self.detectEnd)
         self.thread.progress_update.connect(self.updateProgressBar)
 
     def open_up_desktop_files(self, path):
+        """
+        Open up windows resource manager to see folders and result directly
+        :param path:
+        :return:
+        """
 
         desktopService = QDesktopServices()
         path_url = hp.load_file(path).replace('/', '\\').replace('\\', '\\\\')
@@ -254,21 +329,20 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
 
     def start_detect(self):
+        """
+        Deal with detect prepare job
+        :return:
+        """
 
         self.image_path = ''
         self.statusBrowser.clear()
-        self.progressBar.reset()
 
         if self.mode == 'image' and self.image_mode == 'single':
             # only predict by one zebra when image is only single
             self.chooseZebraCombo.setCurrentIndex(0)
             self.image_path = self.imagePathLineEdit.text()
             if not self.image_path == '':
-                # set image to the grahicalview
                 self.do_detect()
-                file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH + '/')
-                file_path = hp.load_file(C.DEFAULT_RESULT_PATH + '/' + file_name)
-                self.set_image_view(file_path)
                 self.statusBar().showMessage('single image predict success')
             else:
                 self.statusbar.showMessage('Choose image first')
@@ -311,6 +385,10 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
 
     def setting(self):
+        """
+        Open up Setting Dialog
+        :return:
+        """
         setting_dialog = SettingDialog()
         setting_dialog.setWindowIcon(self.windowIcon())
         setting_dialog.setWindowModality(Qt.ApplicationModal)
@@ -321,6 +399,10 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
 
     def about(self):
+        """
+        Open up About Dialog
+        :return:
+        """
         about_dialog = AboutDialog()
         about_dialog.setWindowIcon(self.windowIcon())
         about_dialog.setWindowModality(Qt.ApplicationModal)
@@ -329,6 +411,10 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
 
     def auto_prepare(self):
+        """
+        Open up Prepare Dialog
+        :return:
+        """
         prepare_dialog = AutoPrepare()
         prepare_dialog.setWindowIcon(self.windowIcon())
         prepare_dialog.setWindowModality(Qt.ApplicationModal)
@@ -337,14 +423,18 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
 
 
-
     def reset_default(self):
+        """
+        Reset some parameters to default
+        :return:
+        """
         self.chooseModelCombo.setCurrentIndex(0)
         self.chooseZebraCombo.setCurrentIndex(0)
         self.chooseVideoType.setCurrentIndex(0)
         self.statusBrowser.clear()
         self.imagePathLineEdit.clear()
         self.graphicsView.setScene(None)
+        self.progressBar.reset()
 
 
     def __del__(self):
@@ -353,6 +443,11 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
 
     def normalOutputWritten(self, text):
+        """
+        When text come,show it on statusBrowser by child thread
+        :param text:
+        :return:
+        """
         cursor = self.statusBrowser.textCursor()
         cursor.movePosition(QtGui.QTextCursor.End)
         cursor.insertText(text)
@@ -368,6 +463,14 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.imageOptions.setEnabled(True)
             self.videoOptions.setEnabled(False)
             self.statusBar().showMessage('image mode')
+
+    def select_videoType(self):
+        """
+        Select video type and write into config file
+        :return:
+        """
+        type = self.chooseVideoType.currentText()
+        C.set_config_file("global setting", "default_video_source", type)
 
 
     def get_video_checked(self):

@@ -21,6 +21,10 @@ val = 0
 mutex = threading.Lock()
 
 class DensityThread (threading.Thread):
+    """
+    Use this thread class to pass progress to MainWindow
+    and do predict and caculate work at the same time.
+    """
     def __init__(self, pe,threadId):
         threading.Thread.__init__(self)
         self.pe = pe
@@ -198,6 +202,12 @@ def get_caculations(predictions, pe):
 
 
 def adjust_max_density(zebra,result_set):
+    """
+    Adjust max density by getting group images' density average to better fit next start
+    :param zebra:
+    :param result_set:
+    :return:
+    """
     sum = count = 0
 
     for image,density in result_set.items():
