@@ -29,8 +29,14 @@ If you finish all the above,then you are good to go.
 
 ## How is the whole process of my design
 1.First the program **do the detect**.
+&nbsp;
+
 2.Then program **do caculation of the detect**,give user the density of each image.
+&nbsp;
+
 3.And according to whether is gaofeng or not,it decide whether people or cars can go first when the density **exceed** the max density.
+&nbsp;
+
 4.Finally,the max density will **auto adjust** to best fit current road condition under pre-specified mode.
 
 
