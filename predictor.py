@@ -100,7 +100,8 @@ def core_predict(directory,tag,pe):
 
     # path used for storing predictions results
     result_path = C.DEFAULT_RESULT_PATH
-    hp.mkdir(result_path)
+    if pe.get_zebra().is_one_zebra():
+        hp.remake_dir(result_path)
     # init the failed count
     failed_count = 0
     image_path = pe.get_image_path()

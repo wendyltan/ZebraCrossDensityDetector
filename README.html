@@ -18,7 +18,7 @@
 Also,make sure you have set up your environment as what <a href="https://github.com/amdegroot/ssd.pytorch">ssd.pytorch</a> project told you.</p>
 <p>&nbsp;
 If you finish all the above,then you are good to go.</p>
-<h3>Basic steps of the whole process</h3>
+<h2>Basic steps of the whole process</h2>
 <ol>
 <li>Run <code>train.py</code> to train network. feel free to adjust the parameters yourself cause I don't really know what's the best parameter either.</li>
 <li>Run <code>eval.py</code> to caculate the APs and mAP to see how precise can the network be.</li>
@@ -31,13 +31,23 @@ If you finish all the above,then you are good to go.</p>
 <li>Make sure the cars and people image have <strong>the same count</strong>.If not,it may have an effect on final result.</li>
 </ol>
 <h2>How is the whole process of my design</h2>
-<p>First the program <strong>do the detect</strong>.Then program <strong>do caculation of the detect</strong>,give user the density of each image,and according to whether is gaofeng or not,it decide whether people or cars can go first when the density <strong>exceed</strong> the max density.Finally,the max density will <strong>auto adjust</strong> to best fit current road condition under pre-specified mode.</p>
+<p>1.First the program <strong>do the detect</strong>.
+&nbsp;</p>
+<p>2.Then program <strong>do caculation of the detect</strong>,give user the density of each image.
+&nbsp;</p>
+<p>3.And according to whether is gaofeng or not,it decide whether people or cars can go first when the density <strong>exceed</strong> the max density.
+&nbsp;</p>
+<p>4.Finally,the max density will <strong>auto adjust</strong> to best fit current road condition under pre-specified mode.</p>
+<h2>New features compared to last push!</h2>
+<p><code>多线程显示界面去卡顿</code> ，<code>进度条（模拟）显示运行时长</code></p>
 <h2>TODO</h2>
 <p>The part I hope to complete in the near future
 - Still to come:
   * [x] Figure out the best wait to caulate density.
-  * [ ] Do refactor to make codes more readable.
+  * [x] Do refactor to make codes more readable.
   * [x] Combine <code>auto_prepare.py</code> with user interface.
-  * [x] 编写开题和中期检查表</p>
+  * [x] 编写开题和中期检查表
+  * [ ] 完善README
+  * [ ] 编写最终的论文</p>
 </body>
 </html>

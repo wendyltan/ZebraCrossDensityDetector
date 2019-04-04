@@ -50,12 +50,14 @@ class DensityThread (threading.Thread):
             self.read_progress()
 
     def write_progress(self):
-        i = 0.01
+        i = 0.005
         while finish != True:
             mutex.acquire(10)
             f = open('progress_write.txt', 'w')
             f.writelines(str(i) + '\n')
-            i += 0.01
+            i += 0.005
+            if i > 100:
+                break
             f.close()
             mutex.release()
 
@@ -67,6 +69,8 @@ class DensityThread (threading.Thread):
             lines = f.readlines()  # 读取所有行
             last_line = lines[0].strip('\n')  # 取最后一行
             val = int(float(last_line))
+            if val >= 100:
+                break
             f.close()
             mutex.release()
 

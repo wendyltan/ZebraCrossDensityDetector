@@ -166,7 +166,6 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         if self.image_path != '':
             file_name = hp.get_latest_file(C.DEFAULT_RESULT_PATH + '/')
             file_path = hp.load_file(C.DEFAULT_RESULT_PATH + '/' + file_name)
-            print(file_path)
             self.set_image_view(file_path)
 
 
@@ -220,7 +219,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         elif self.mode == 'video' and from_which != '':
             base_dir = 'my_dataset/video_'
             self.result_path = base_dir + self.tag
-            hp.mkdir(self.result_path)
+            hp.remake_dir(self.result_path)
             if from_which == 'camera':
                 self.imageCapture()
             elif from_which == 'video_file':
@@ -333,9 +332,12 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         Deal with detect prepare job
         :return:
         """
-
+        if not hp.dir_exist(C.DEFAULT_RESULT_PATH):
+            self.statusbar.showMessage('No my_dataset/ exist!Use 快速部署 first.')
+            return
         self.image_path = ''
         self.statusBrowser.clear()
+        hp.remake_dir(C.DEFAULT_RESULT_PATH)
 
         if self.mode == 'image' and self.image_mode == 'single':
             # only predict by one zebra when image is only single
@@ -363,6 +365,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
                 if self.chooseZebraCombo.currentText() == 'one_zebra':
                     self.tag = 'people'
                     self.video_source = base_path + self.tag + '.mp4'
+                    self.chooseZebraCombo.setCurrentIndex(0)
                     self.showFrame()
                 elif self.chooseZebraCombo.currentText() == 'tri_zebra' or \
                         self.chooseZebraCombo.currentText() == 'rec_zebra':

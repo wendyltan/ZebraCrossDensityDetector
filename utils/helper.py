@@ -40,6 +40,11 @@ def image_resize(file_path):
     out.save(file_path)
 
 
+def dir_exist(path):
+    if os.path.exists(path):
+        return True
+    else:
+        return False
 def mkdir(path):
     '''
     Make a new directory to store result pictures
@@ -51,9 +56,10 @@ def mkdir(path):
         print('make directory ' ,path,' success')
 
 def remake_dir(path):
-    shutil.rmtree(path)
-    os.makedirs(path)
-    print('remake directory ',path, ' success')
+    if os.path.exists(path):
+        shutil.rmtree(path)
+        os.makedirs(path)
+        print('remake directory ',path, ' success')
 
 def load_file(relative_path):
 
