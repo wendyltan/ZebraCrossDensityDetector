@@ -165,8 +165,8 @@ def core_predict(directory,tag,pe):
                 cv2.imwrite(result_path + '/result_' + tag+'_'+img_name, img)
 
                 pred_num += 1
-                # print(str(pred_num) + ' ' + label_name + ' , score: ' +
-                #       str(score) + ' position: ' + ' || '.join(str(c) for c in coords))
+                print(str(pred_num) + ' ' + label_name + ' , score: ' +
+                      str(score) + ' position: ' + ' || '.join(str(c) for c in coords))
                 predict.type_identify(label_name)
                 j += 1
 

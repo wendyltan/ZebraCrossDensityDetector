@@ -51,6 +51,6 @@ The part I hope to complete in the near future
   * [x] Combine `auto_prepare.py` with user interface.
   * [x] 编写开题和中期检查表
   * [ ] 完善README
-  * [ ] 编写最终的论文
+  * [x] 完成论文初稿
 
 

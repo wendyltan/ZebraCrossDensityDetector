@@ -337,7 +337,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             return
         self.image_path = ''
         self.statusBrowser.clear()
-        hp.remake_dir(C.DEFAULT_RESULT_PATH)
+        # hp.remake_dir(C.DEFAULT_RESULT_PATH)
 
         if self.mode == 'image' and self.image_mode == 'single':
             # only predict by one zebra when image is only single

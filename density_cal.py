@@ -83,7 +83,6 @@ def core_density(zebra_type,predictions,tag):
     :param density: a dictionary,could be empty
     :return:
     """
-
     density={}
     for image, result in predictions.items():
         if result != {}:
@@ -182,12 +181,10 @@ def get_caculations(predictions, pe):
     result_set = {}
     zebra = pe.get_zebra()
 
-
     if pe.is_current_model_single():
         result_set = single_model_caculation(zebra,predictions)
     elif not pe.is_current_model_single():
         result_set = muti_model_caculation(zebra,predictions)
-
     print("Final result of density caculation: ",result_set)
 
     dc.draw(result_set,zebra)
