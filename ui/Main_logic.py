@@ -219,6 +219,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         elif self.mode == 'video' and from_which != '':
             base_dir = 'my_dataset/video_'
             self.result_path = base_dir + self.tag
+            hp.mkdir(self.result_path)
             hp.remake_dir(self.result_path)
             if from_which == 'camera':
                 self.imageCapture()
@@ -337,7 +338,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             return
         self.image_path = ''
         self.statusBrowser.clear()
-        # hp.remake_dir(C.DEFAULT_RESULT_PATH)
+        self.progressBar.reset()
 
         if self.mode == 'image' and self.image_mode == 'single':
             # only predict by one zebra when image is only single

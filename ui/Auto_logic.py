@@ -48,6 +48,7 @@ class AutoPrepare(QtWidgets.QDialog,Ui_Dialog):
         hp.mkdir('my_dataset/video')
         hp.mkdir('my_dataset/zebra_cars')
         hp.mkdir('my_dataset/zebra_people')
+        hp.mkdir('my_dataset/result')
 
 
     def copy_files(self):
