@@ -117,8 +117,13 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         self.imageDirCheckbox.clicked.connect(self.image_mode_select)
         self.chooseImageBtn.clicked.connect(self.single_image)
 
+        # self.singleImageCheckbox.stateChanged.connect(self.image_mode_select)
+        # self.imageDirCheckbox.stateChanged.connect(self.image_mode_select)
+
+
         self.action_image_mode.triggered.connect(self.get_image_checked)
         self.action_video_mode.triggered.connect(self.get_video_checked)
+
 
         # ---------------video file frame config------------------------------ #
         self.frame_num = 0
@@ -178,6 +183,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         file_name, _ = QtWidgets.QFileDialog.getOpenFileName(self, '打开图片', r'my_dataset/',
                                                              'Image Files(*.jpg *.jpeg *.png)')
         self.imagePathLineEdit.setText(file_name)
+        self.image_path = file_name
         self.set_image_view(file_name)
 
     def set_image_view(self, file_name):
@@ -240,6 +246,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         timeF = fps * 5
         print('Start to save frame from video every ', timeF, ' frame')
         i = 0
+
         while ret:  # read video frame
             ret, frame = self.cap.read()
             if ret:
@@ -336,6 +343,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         if not hp.dir_exist(C.DEFAULT_RESULT_PATH):
             self.statusbar.showMessage('No my_dataset/ exist!Use 快速部署 first.')
             return
+
         self.image_path = ''
         self.statusBrowser.clear()
         self.progressBar.reset()
@@ -343,7 +351,6 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         if self.mode == 'image' and self.image_mode == 'single':
             # only predict by one zebra when image is only single
             self.chooseZebraCombo.setCurrentIndex(0)
-            self.image_path = self.imagePathLineEdit.text()
             if not self.image_path == '':
                 self.do_detect()
                 self.statusBar().showMessage('single image predict success')
@@ -468,6 +475,15 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.videoOptions.setEnabled(False)
             self.statusBar().showMessage('image mode')
 
+    def get_video_checked(self):
+        if self.action_video_mode.isChecked():
+            self.action_video_mode.setChecked(True)
+            self.action_image_mode.setChecked(False)
+            self.mode = 'video'
+            self.videoOptions.setEnabled(True)
+            self.imageOptions.setEnabled(False)
+            self.statusBar().showMessage('video mode')
+
     def select_videoType(self):
         """
         Select video type and write into config file
@@ -477,14 +493,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
         C.set_config_file("global setting", "default_video_source", type)
 
 
-    def get_video_checked(self):
-        if self.action_video_mode.isChecked():
-            self.action_video_mode.setChecked(True)
-            self.action_image_mode.setChecked(False)
-            self.mode = 'video'
-            self.videoOptions.setEnabled(True)
-            self.imageOptions.setEnabled(False)
-            self.statusBar().showMessage('video mode')
+
 
 
 

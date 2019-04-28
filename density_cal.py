@@ -305,10 +305,3 @@ def start_caculate(pe):
     writeThread.start()
     workThread.start()
     readThread.start()
-
-# if __name__ == '__main__':
-#     zebra = Zebra('one_zebra')
-#     pe = ProgramEntity(zebra,'image',r'','single')
-#     print('Applying scene: ', zebra.get_name(), '.Using model:',pe.get_current_model())
-#     predictions = get_predictions(pe)
-#     get_caculations(predictions, pe)

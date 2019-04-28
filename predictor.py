@@ -23,7 +23,7 @@ def predict(pe):
     :param pe: program entity
     :return:
     """
-
+    hp.remake_dir(C.DEFAULT_RESULT_PATH)
     if not pe.is_current_model_single():
         return muti_model_predict(pe)
     elif pe.is_current_model_single():
@@ -70,6 +70,7 @@ def get_predicts(pe):
     total = {}
     zebra = pe.get_zebra()
 
+
     if zebra.is_one_zebra():
         dir = pe.get_image_source_path(tag[0])
 
@@ -100,8 +101,6 @@ def core_predict(directory,tag,pe):
 
     # path used for storing predictions results
     result_path = C.DEFAULT_RESULT_PATH
-    if pe.get_zebra().is_one_zebra():
-        hp.remake_dir(result_path)
     # init the failed count
     failed_count = 0
     image_path = pe.get_image_path()
@@ -162,7 +161,7 @@ def core_predict(directory,tag,pe):
                               C.COLORS[i % 3], 2)
                 cv2.putText(img, label_name, (int(pt[0]), int(pt[1])),
                             C.FONT, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
-                cv2.imwrite(result_path + '/result_' + tag+'_'+img_name, img)
+                cv2.imwrite(result_path + '/result_' + tag+'_'+model_name+'_'+img_name, img)
 
                 pred_num += 1
                 print(str(pred_num) + ' ' + label_name + ' , score: ' +
