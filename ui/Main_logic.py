@@ -7,7 +7,7 @@
 # @Software: PyCharm
 
 import sys
-
+import time
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QUrl, Qt, QThread, pyqtSignal, QTimer, QDateTime, QBasicTimer
 from PyQt5.QtGui import QIcon, QImage, QPixmap, QDesktopServices
@@ -57,6 +57,7 @@ class DetectThread(QThread):
 
         dcl.start_caculate(pe)
         while not dcl.finish:
+            time.sleep(1)
             self.progress_update.emit(dcl.val)
 
         self.progress_update.emit(100)
@@ -123,6 +124,8 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
 
         self.action_image_mode.triggered.connect(self.get_image_checked)
         self.action_video_mode.triggered.connect(self.get_video_checked)
+
+        self.image_path = ''
 
 
         # ---------------video file frame config------------------------------ #
@@ -344,7 +347,7 @@ class MainWindow(QtWidgets.QMainWindow,Ui_MainWindow):
             self.statusbar.showMessage('No my_dataset/ exist!Use 快速部署 first.')
             return
 
-        self.image_path = ''
+
         self.statusBrowser.clear()
         self.progressBar.reset()
 
